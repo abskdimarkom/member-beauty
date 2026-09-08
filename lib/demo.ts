@@ -8,7 +8,7 @@ export const member: Member = {
   kode: 'DEMO-0001',
   name: 'Nabila Putri',
   firstName: 'Nabila',
-  card: 'BK000082716',
+  card: '200000082716',
   phone: '081234567890',
   tier: 'GOLD',
   points: 2480,
