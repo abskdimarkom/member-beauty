@@ -1,6 +1,7 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "member-beauty",
+  "account_id": "fe61dcab1127091f51fcac2a5017efa1",
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-09-07",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
@@ -14,6 +15,12 @@
   "images": {
     "binding": "IMAGES"
   },
+  "r2_buckets": [
+    {
+      "binding": "PROFILE_PHOTOS",
+      "bucket_name": "member-beauty-profile-photos"
+    }
+  ],
   "observability": {
     "enabled": true
   }

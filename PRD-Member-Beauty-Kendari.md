@@ -23,16 +23,17 @@ Member aktif program loyalti Beauty Kendari, mengakses dari HP (mayoritas), kemu
 
 ### 4.1 Fitur inti (MVP)
 1. **Login member** — input nomor HP atau nomor kartu → cari ke API → kalau ketemu, buat sesi
-2. **Kartu member digital** — nama, nomor kartu, tier (`JMember`: GOLD/dst), **QR code standar berisi nomor kartu sebagai teks** (bukan format barcode fisik Code128/EAN — kasir cukup scan dan baca isinya sebagai teks)
+2. **Kartu member digital** — nama, nomor kartu, tier (`JMember`: GOLD/dst), dan **barcode Code 39 berisi nomor kartu** agar kasir dapat memindainya langsung.
 3. **Saldo poin** — `PointAkhir`, tanggal berakhir kartu (`TglBerakhir`)
 4. **Riwayat poin** — list transaksi (tanggal, keterangan, nominal belanja, poin didapat/dipakai), dari `/api/listhistoripoint`
 5. **Info & ketentuan penukaran poin** — halaman statis (bukan dari API — lihat pertanyaan §7)
 6. **PWA** — bisa di-"Install to Home Screen", ada app icon & splash screen sesuai branding Beauty Kendari
+7. **Foto profil** — member dapat memilih, mengganti, atau menghapus avatar; foto dipotong persegi, dikompresi ke WebP, lalu disimpan secara privat di Cloudflare R2
 
 ### 4.2 Di luar lingkup (eksplisit)
 - Penukaran poin dari app (tetap manual di kasir)
 - Pendaftaran member baru dari app (tetap di kasir/CS, kecuali dinyatakan lain nanti)
-- Edit profil member dari app (PUT ke API berisiko tinggi kalau salah kirim field — lihat catatan dokumentasi soal PUT yang overwrite penuh; MVP read-only dulu)
+- Edit data profil Affari seperti nama atau nomor HP (PUT ke API berisiko tinggi kalau salah kirim field; foto profil dikelola terpisah di R2)
 - Notifikasi push
 
 ## 5. Alur Pengguna
@@ -58,10 +59,11 @@ Member aktif program loyalti Beauty Kendari, mengakses dari HP (mayoritas), kemu
 |---|---|
 | Framework | Next.js (App Router) |
 | Database | Tidak ada — konsumsi API Affari real-time |
+| Penyimpanan foto profil | Cloudflare R2, bucket privat dan diakses melalui route terautentikasi |
 | Sesi login | Signed cookie (JWT), berisi kode member, masa berlaku pendek-menengah (misal 7 hari) |
 | Auth ke API Affari | Header `affari_token`, dipanggil dari **server route Next.js** (bukan client-side) supaya token tidak bocor ke browser |
 | Platform | PWA — manifest.json, service worker, app icon dari branding Beauty Kendari (ikon hati+"b", `#FE3E9F`) |
-| Deploy | Vercel |
+| Deploy | Cloudflare Workers melalui OpenNext |
 | Keamanan sesi | Cukup nomor HP/kartu tanpa OTP untuk MVP — lapisan verifikasi tambahan belum diperlukan sekarang, bisa ditambah di iterasi berikutnya kalau perlu |
 
 ### 6.1 Penanganan error & edge case wajib (mengikuti [[scoring-playbook]])
@@ -78,9 +80,10 @@ Member aktif program loyalti Beauty Kendari, mengakses dari HP (mayoritas), kemu
 |---|---|---|
 | 1 | Nomor HP/kartu dobel | Tidak pernah terjadi — login selalu dapat objek tunggal |
 | 2 | Ketentuan penukaran poin | Belum ada teks final → dummy/placeholder untuk MVP, mudah diganti nanti |
-| 3 | Deploy target | Vercel |
+| 3 | Deploy target | Cloudflare Workers melalui OpenNext |
 | 4 | Keamanan sesi tambahan (OTP dll) | Belum diperlukan untuk MVP |
 | 5 | Branding | Logo hati+"b", pink `#FE3E9F` — sudah diterima |
-| 6 | Format QR/barcode kartu | QR standar berisi nomor kartu sebagai teks (bukan Code128/EAN) |
+| 6 | Format barcode kartu | Code 39 berisi nomor kartu |
+| 7 | Penyimpanan foto profil | Bucket privat Cloudflare R2, satu objek per kode member |
 
 PRD ini sudah final untuk memulai tahap wireframe/struktur halaman dan build.

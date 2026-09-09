@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent, type KeyboardEvent, type ReactNode } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import * as Dialog from '@radix-ui/react-dialog';
-import { Ean13 } from '@/components/ean13';
-import { ArrowClockwise, ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, Bag, CalendarBlank, CaretDown, CaretRight, Check, CheckCircle, Clock, Copy, Crown, DeviceMobile, DownloadSimple, Gift, Heart, House, Info, Moon, QrCode, Receipt, ShieldCheck, SignOut, Sparkle, Sun, WarningCircle, X } from '@phosphor-icons/react';
+import { Code39 } from '@/components/code39';
+import { ArrowClockwise, ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, Bag, BarcodeIcon, CalendarBlank, CameraIcon, CaretDown, CaretRight, Check, CheckCircle, Clock, Copy, Crown, DeviceMobile, DownloadSimple, Gift, Heart, House, Info, Moon, Receipt, ShieldCheck, SignOut, Sparkle, Sun, TrashSimpleIcon, WarningCircle, X } from '@phosphor-icons/react';
 import { dateLabel, number, rupiah } from '@/lib/format';
 import type { PageData } from '@/lib/load';
 import type { Member, Transaction } from '@/lib/types';
@@ -16,34 +16,139 @@ type Page = 'home' | 'history' | 'info';
 type InstallPrompt = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> };
 const navigation = [{ href: '/', label: 'Beranda', icon: House, page: 'home' }, { href: '/riwayat', label: 'Riwayat poin', icon: Clock, page: 'history' }, { href: '/info', label: 'Info penukaran', icon: Gift, page: 'info' }];
 const initials = (name: string) => name.split(/\s+/).slice(0, 2).map(word => word[0] ?? '').join('').toUpperCase() || 'B';
+const MAX_PROFILE_PHOTO_SIZE = 8 * 1024 * 1024;
+const PROFILE_PHOTO_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
+
+function avatarContent(photo: string | null, name: string, onError: () => void) {
+  return photo ? <img className="avatar-photo" src={photo} alt="" onError={onError} /> : initials(name);
+}
+
+/** Centre-crops and compresses the selected image before uploading it to R2. */
+function prepareProfilePhoto(file: File): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    const objectUrl = URL.createObjectURL(file);
+    const photo = new window.Image();
+
+    photo.onload = () => {
+      const canvas = document.createElement('canvas');
+      const outputSize = 512;
+      const cropSize = Math.min(photo.naturalWidth, photo.naturalHeight);
+      const cropX = (photo.naturalWidth - cropSize) / 2;
+      const cropY = (photo.naturalHeight - cropSize) / 2;
+      canvas.width = outputSize;
+      canvas.height = outputSize;
+      const context = canvas.getContext('2d');
+      if (!context) {
+        URL.revokeObjectURL(objectUrl);
+        reject(new Error('Foto belum bisa diproses. Coba pilih foto lain.'));
+        return;
+      }
+
+      context.imageSmoothingEnabled = true;
+      context.imageSmoothingQuality = 'high';
+      context.drawImage(photo, cropX, cropY, cropSize, cropSize, 0, 0, outputSize, outputSize);
+      canvas.toBlob((result) => {
+        URL.revokeObjectURL(objectUrl);
+        if (result) resolve(result);
+        else reject(new Error('Foto belum bisa diproses. Coba pilih foto lain.'));
+      }, 'image/webp', 0.82);
+    };
+
+    photo.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error('Foto tidak dapat dibuka. Coba pilih foto lain.'));
+    };
+    photo.src = objectUrl;
+  });
+}
 /** Months offered by the history filter: the current month and the eleven before it. */
 function monthOptions() { const now = new Date(); return Array.from({ length: 12 }, (_, index) => { const date = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - index, 1)); return { value: date.toISOString().slice(0, 7), label: new Intl.DateTimeFormat('id-ID', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(date) }; }); }
 
 export function Brand({ light = false }: { light?: boolean }) { return <span className={`brand ${light ? 'brand-light' : ''}`}><Image className="brand-symbol" src="/logo.png" alt="" width={591} height={548} sizes="44px" /><span className="brand-type">beauty<span>KENDARI</span></span></span>; }
-function Modal({ open, setOpen, title, description, children }: { open: boolean; setOpen: (open: boolean) => void; title: string; description: string; children: ReactNode }) { return <Dialog.Root open={open} onOpenChange={setOpen}><Dialog.Portal><Dialog.Overlay className="modal-overlay" /><Dialog.Content className="modal-content"><Dialog.Close className="icon-button modal-close" aria-label="Tutup"><X size={21} /></Dialog.Close><Dialog.Title>{title}</Dialog.Title><Dialog.Description>{description}</Dialog.Description>{children}</Dialog.Content></Dialog.Portal></Dialog.Root>; }
+function Modal({ open, setOpen, title, description, children, className = '' }: { open: boolean; setOpen: (open: boolean) => void; title: string; description: string; children: ReactNode; className?: string }) { return <Dialog.Root open={open} onOpenChange={setOpen}><Dialog.Portal><Dialog.Overlay className="modal-overlay" /><Dialog.Content className={`modal-content ${className}`}><Dialog.Close className="icon-button modal-close" aria-label="Tutup"><X size={21} /></Dialog.Close><Dialog.Title>{title}</Dialog.Title><Dialog.Description>{description}</Dialog.Description>{children}</Dialog.Content></Dialog.Portal></Dialog.Root>; }
 function ThemeButton() { const [dark, setDark] = useState(false); useEffect(() => { const value = localStorage.getItem('beauty-theme'); const next = value ? value === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches; setDark(next); document.documentElement.dataset.theme = next ? 'dark' : 'light'; }, []); return <button className="icon-button theme-button" aria-label={dark ? 'Aktifkan mode terang' : 'Aktifkan mode gelap'} onClick={() => { setDark(!dark); document.documentElement.dataset.theme = dark ? 'light' : 'dark'; localStorage.setItem('beauty-theme', dark ? 'light' : 'dark'); }}>{dark ? <Sun size={21} /> : <Moon size={21} />}</button>; }
 
 export function BeautyApp({ page, data }: { page: Page; data: PageData }) {
  const { member, transactions, demo, historyFailed } = data;
  const router = useRouter();
  const [qrOpen, setQrOpen] = useState(false); const [helpOpen, setHelpOpen] = useState(false); const [accountOpen, setAccountOpen] = useState(false); const [installOpen, setInstallOpen] = useState(false); const [installPrompt, setInstallPrompt] = useState<InstallPrompt | null>(null); const [installed, setInstalled] = useState(false); const [copied, setCopied] = useState(false); const [selection, setSelection] = useState<Transaction | null>(null);
+ const [avatarPhoto, setAvatarPhoto] = useState<string | null>(null); const [avatarBusy, setAvatarBusy] = useState(false); const [avatarMessage, setAvatarMessage] = useState(''); const [avatarError, setAvatarError] = useState('');
+ const avatarInputRef = useRef<HTMLInputElement>(null);
  useEffect(() => { if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {}); const handler = (event: Event) => { event.preventDefault(); setInstallPrompt(event as InstallPrompt); }; const onInstalled = () => { setInstalled(true); setInstallPrompt(null); }; window.addEventListener('beforeinstallprompt', handler); window.addEventListener('appinstalled', onInstalled); setInstalled(window.matchMedia('(display-mode: standalone)').matches); return () => { window.removeEventListener('beforeinstallprompt', handler); window.removeEventListener('appinstalled', onInstalled); }; }, []);
+ useEffect(() => { setAvatarPhoto(`/api/profile-photo?v=${encodeURIComponent(member.kode || member.card)}`); setAvatarMessage(''); setAvatarError(''); }, [member.card, member.kode]);
  async function copyCard() { try { await navigator.clipboard.writeText(member.card); setCopied(true); } catch { setCopied(false); } }
+ async function changeAvatar(event: ChangeEvent<HTMLInputElement>) {
+  const file = event.target.files?.[0];
+  event.target.value = '';
+  if (!file) return;
+  setAvatarMessage(''); setAvatarError('');
+  if (!PROFILE_PHOTO_TYPES.has(file.type)) { setAvatarError('Pilih foto berformat JPG, PNG, atau WebP.'); return; }
+  if (file.size > MAX_PROFILE_PHOTO_SIZE) { setAvatarError('Ukuran foto maksimal 8 MB. Pilih foto yang lebih kecil.'); return; }
+  setAvatarBusy(true);
+  try {
+   const photo = await prepareProfilePhoto(file);
+   const response = await fetch('/api/profile-photo', { method: 'PUT', headers: { 'Content-Type': 'image/webp' }, body: photo });
+   const result = await response.json().catch(() => ({})) as { error?: string };
+   if (!response.ok) throw new Error(result.error ?? 'Foto belum bisa disimpan. Coba lagi.');
+   setAvatarPhoto(`/api/profile-photo?v=${Date.now()}`);
+   setAvatarMessage('Foto profil berhasil diperbarui.');
+  } catch (error) {
+   setAvatarError(error instanceof Error ? error.message : 'Foto belum bisa disimpan. Coba lagi.');
+  } finally {
+   setAvatarBusy(false);
+  }
+ }
+ async function removeAvatar() {
+  setAvatarBusy(true); setAvatarMessage(''); setAvatarError('');
+  try {
+   const response = await fetch('/api/profile-photo', { method: 'DELETE' });
+   const result = await response.json().catch(() => ({})) as { error?: string };
+   if (!response.ok) throw new Error(result.error ?? 'Foto belum bisa dihapus. Coba lagi.');
+   setAvatarPhoto(null);
+   setAvatarMessage('Foto profil dihapus.');
+  } catch (error) {
+   setAvatarError(error instanceof Error ? error.message : 'Foto belum bisa dihapus. Coba lagi.');
+  } finally {
+   setAvatarBusy(false);
+  }
+ }
  async function install() { if (installPrompt) { await installPrompt.prompt(); const choice = await installPrompt.userChoice; if (choice.outcome === 'accepted') setInstalled(true); setInstallPrompt(null); } else setInstallOpen(true); }
  async function logout() { try { await fetch('/api/logout', { method: 'POST' }); } finally { router.replace('/login'); router.refresh(); } }
  return <div className={`app-shell ${page === 'home' ? 'home-page' : page === 'history' ? 'history-page' : 'info-page'}`}>
-  <aside className="sidebar"><Link href="/" aria-label="Beauty Kendari beranda"><Brand /></Link><div className="sidebar-label">RUANG MEMBER</div><nav aria-label="Navigasi utama">{navigation.map(item => <Link key={item.page} href={item.href} className={`nav-link ${page === item.page ? 'active' : ''}`} aria-current={page === item.page ? 'page' : undefined}><item.icon size={22} weight={page === item.page ? 'fill' : 'regular'} /><span>{item.label}</span>{page === item.page && <span className="nav-active-mark" />}</Link>)}</nav><div className="sidebar-bottom"><div className="pocket-card"><span className="pocket-icon"><DeviceMobile size={26} /></span><h3>Beauty, selalu dekat.</h3><p>Akses kartu member langsung dari layar utama HP.</p><button className="button secondary small" onClick={install} disabled={installed}><DownloadSimple size={17} />{installed ? 'Sudah terpasang' : 'Pasang aplikasi'}</button></div><button className="help-link" onClick={() => setHelpOpen(true)}><Info size={20} />Butuh bantuan?<ArrowUpRight size={16} /></button><div className="sidebar-account"><span className="avatar">{initials(member.name)}</span><span><strong>{member.name}</strong><small>Beauty member</small></span><button className="icon-button" onClick={logout} aria-label="Keluar"><SignOut size={21} /></button></div></div></aside>
-  <div className="workspace"><header className="topbar"><span className="desktop-breadcrumb">Member area <CaretRight size={14} /><strong>{page === 'home' ? 'Beranda' : page === 'history' ? 'Riwayat poin' : 'Info penukaran'}</strong></span><Link href="/" className="mobile-brand" aria-label="Beauty Kendari"><Brand /></Link><div className="header-actions">{demo && <Link href="/login" className="demo-label">Data demo <ArrowUpRight size={13} /></Link>}<ThemeButton /><span className="header-divider" /><button className="avatar small-avatar account-button" onClick={() => setAccountOpen(true)} aria-label="Akun dan pengaturan">{initials(member.name)}</button></div></header>
+  <aside className="sidebar"><Link href="/" aria-label="Beauty Kendari beranda"><Brand /></Link><div className="sidebar-label">RUANG MEMBER</div><nav aria-label="Navigasi utama">{navigation.map(item => <Link key={item.page} href={item.href} className={`nav-link ${page === item.page ? 'active' : ''}`} aria-current={page === item.page ? 'page' : undefined}><item.icon size={22} weight={page === item.page ? 'fill' : 'regular'} /><span>{item.label}</span>{page === item.page && <span className="nav-active-mark" />}</Link>)}</nav><div className="sidebar-bottom"><div className="pocket-card"><span className="pocket-icon"><DeviceMobile size={26} /></span><h3>Beauty, selalu dekat.</h3><p>Akses kartu member langsung dari layar utama HP.</p><button className="button secondary small" onClick={install} disabled={installed}><DownloadSimple size={17} />{installed ? 'Sudah terpasang' : 'Pasang aplikasi'}</button></div><button className="help-link" onClick={() => setHelpOpen(true)}><Info size={20} />Butuh bantuan?<ArrowUpRight size={16} /></button><div className="sidebar-account"><span className={`avatar ${avatarPhoto ? 'has-photo' : ''}`}>{avatarContent(avatarPhoto, member.name, () => setAvatarPhoto(null))}</span><span><strong>{member.name}</strong><small>Beauty member</small></span><button className="icon-button" onClick={logout} aria-label="Keluar"><SignOut size={21} /></button></div></div></aside>
+  <div className="workspace"><header className="topbar"><span className="desktop-breadcrumb">Member area <CaretRight size={14} /><strong>{page === 'home' ? 'Beranda' : page === 'history' ? 'Riwayat poin' : 'Info penukaran'}</strong></span><Link href="/" className="mobile-brand" aria-label="Beauty Kendari"><Brand /></Link><div className="header-actions">{demo && <Link href="/login" className="demo-label">Data demo <ArrowUpRight size={13} /></Link>}<ThemeButton /><span className="header-divider" /><button className={`avatar small-avatar account-button ${avatarPhoto ? 'has-photo' : ''}`} onClick={() => setAccountOpen(true)} aria-label="Akun dan pengaturan">{avatarContent(avatarPhoto, member.name, () => setAvatarPhoto(null))}</button></div></header>
   <main id="main-content"><div className="page-heading"><div><div className="greeting">{page === 'home' ? 'RUANG MEMBER' : 'BEAUTY MEMBER'}</div><h1>{page === 'home' ? <>Halo, {member.firstName}! <Sparkle className="heading-sparkle" weight="duotone" /></> : page === 'history' ? 'Riwayat poin' : 'Info penukaran'}</h1><p>{page === 'home' ? 'Kartu member dan poin, selalu dekat denganmu.' : page === 'history' ? 'Pantau poin masuk dan penukaranmu.' : 'Pilih nilai penukaran, lalu tunjukkan kartu ke kasir.'}</p></div>{member.since && <span className="member-since"><Heart size={17} />Member sejak {member.since}</span>}</div>
-  {page === 'home' ? <><section className="overview-grid" aria-label="Kartu dan saldo member"><div className="membership-wrap"><div className="membership-card"><Heart className="card-heart heart-one" weight="thin" /><Heart className="card-heart heart-two" weight="thin" /><div className="card-top"><Brand light /><span className="gold-label"><Crown size={17} weight="fill" />{member.tier} MEMBER</span></div><div className="card-bottom"><div><span className="card-label">YOUR BEAUTY MEMBERSHIP</span><h2>{member.name}</h2><button className="card-number" aria-label="Salin nomor kartu" onClick={copyCard}>{member.card}<Copy size={15} /></button></div><button className="card-qr" onClick={() => setQrOpen(true)} aria-label="Perbesar barcode kartu member"><Ean13 value={member.card} width={112} height={40} title={`Nomor kartu ${member.card}`} /><span><QrCode size={12} />Lihat barcode</span></button></div><div className="card-footer"><span>Teman perjalanan cantikmu.</span><span>beauty member</span></div></div><div className="card-validity"><span><ShieldCheck size={17} />{member.expires ? <>Kartu aktif sampai <strong>{member.expires}</strong></> : 'Tanggal berakhir kartu belum tersedia'}</span><span className="copy-feedback" aria-live="polite">{copied ? 'Nomor tersalin' : ''}</span></div></div>
+  {page === 'home' ? <><section className="overview-grid" aria-label="Kartu dan saldo member"><div className="membership-wrap"><div className="membership-card"><Heart className="card-heart heart-one" weight="thin" /><Heart className="card-heart heart-two" weight="thin" /><div className="card-top"><Brand light /><span className="gold-label"><Crown size={17} weight="fill" />{member.tier} MEMBER</span></div><div className="card-bottom"><div><span className="card-label">YOUR BEAUTY MEMBERSHIP</span><h2>{member.name}</h2><button className="card-number" aria-label="Salin nomor kartu" onClick={copyCard}>{member.card}<Copy size={15} /></button></div><button className="card-qr" onClick={() => setQrOpen(true)} aria-label="Perbesar barcode kartu member"><Code39 value={member.card} width={112} height={40} title={`Code 39 nomor kartu ${member.card}`} /><span><BarcodeIcon size={12} />Lihat barcode</span></button></div><div className="card-footer"><span>Teman perjalanan cantikmu.</span><span>beauty member</span></div></div><div className="card-validity"><span><ShieldCheck size={17} />{member.expires ? <>Kartu aktif sampai <strong>{member.expires}</strong></> : 'Tanggal berakhir kartu belum tersedia'}</span><span className="copy-feedback" aria-live="polite">{copied ? 'Nomor tersalin' : ''}</span></div></div>
   <div className="points-card"><div className="points-top"><span className="label-icon"><span className="circle-icon"><Sparkle size={21} weight="duotone" /></span>Saldo poin kamu</span><span className="status-pill"><CheckCircle size={14} weight="fill" />Aktif</span></div><div className="point-number">{number(member.points)}<span>poin</span></div><div className="points-divider" /><div className="points-note"><Gift size={22} /><span><strong>100 poin = Rp10.000</strong><br />Tukar langsung di kasir outlet.</span></div><Link href="/info" className="text-link">Cara menggunakan poin <ArrowRight size={18} /></Link></div></section>
   <section className="lower-grid"><History compact demo={demo} failed={historyFailed} transactions={transactions} onSelect={setSelection} /><div className="right-column"><div className="beauty-banner"><Image src="/beauty-still-life.webp" alt="Koleksi skincare dan kosmetik bernuansa pink" fill sizes="(max-width: 767px) 100vw, 400px" priority /><div className="banner-copy"><span>UNTUK DIRIMU</span><h2>Cantikmu,<br /><em>lebih berarti.</em></h2><Link href="/info">Lihat pilihan penukaran <ArrowUpRight size={17} /></Link></div></div><button className="outlet-note" onClick={() => setHelpOpen(true)}><span className="circle-icon"><Heart size={22} /></span><span><strong>Kami siap bantu kamu</strong><small>Tanyakan langsung ke tim outlet.</small></span><ArrowUpRight size={19} /></button></div></section></> : page === 'history' ? <History demo={demo} failed={historyFailed} transactions={transactions} onSelect={setSelection} /> : <InfoPage onQr={() => setQrOpen(true)} />}
   <footer className="page-footer"><span>© {new Date().getFullYear()} Beauty Kendari</span><span>Dibuat untuk perjalanan cantikmu <Heart size={13} /></span></footer></main>
   </div><nav className="mobile-nav" aria-label="Navigasi ponsel">{navigation.map(item => <Link key={item.page} href={item.href} className={page === item.page ? 'active' : ''} aria-current={page === item.page ? 'page' : undefined}><item.icon size={22} weight={page === item.page ? 'fill' : 'regular'} /><span>{item.label}</span></Link>)}</nav>
-  <Modal open={qrOpen} setOpen={setQrOpen} title="Kartu member kamu" description="Tunjukkan barcode ini kepada kasir Beauty Kendari."><div className="large-qr"><Ean13 value={member.card} width={340} height={120} title={`Nomor kartu ${member.card}`} /></div><div className="qr-details"><strong>{member.name}</strong><span>{member.card}</span>{demo && <span className="demo-disclaimer">Kartu contoh. Bukan kartu member asli.</span>}</div><button className="button primary full" onClick={copyCard}>{copied ? <Check size={19} /> : <Copy size={19} />}{copied ? 'Nomor tersalin' : 'Salin nomor kartu'}</button></Modal>
+  <Modal open={qrOpen} setOpen={setQrOpen} title="Tunjukkan barcode ke kasir" description="Minta kasir memindai barcode ini untuk menggunakan kartu membermu."><div className="large-qr"><Code39 value={member.card} width={340} height={120} title={`Code 39 nomor kartu ${member.card}`} /></div><div className="qr-details"><strong>{member.name}</strong><span>{member.card}</span>{demo && <span className="demo-disclaimer">Kartu contoh. Bukan kartu member asli.</span>}</div><button className="button primary full" onClick={copyCard}>{copied ? <Check size={19} /> : <Copy size={19} />}{copied ? 'Nomor tersalin' : 'Salin nomor kartu'}</button></Modal>
   <Modal open={helpOpen} setOpen={setHelpOpen} title="Ada yang bisa kami bantu?" description="Tim kasir dan CS Beauty Kendari siap membantu saat kamu berkunjung ke outlet."><div className="help-content"><Info size={26} /><p>Siapkan nomor kartu <strong>{member.card}</strong> dan bukti transaksi untuk pertanyaan seputar saldo atau data member.</p></div><p className="muted">Kontak dan alamat resmi outlet akan ditambahkan setelah dikonfirmasi tim Beauty Kendari.</p><Link className="button primary full" href="/info" onClick={() => setHelpOpen(false)}>Baca info penukaran <ArrowRight size={18} /></Link></Modal>
   <Modal open={installOpen} setOpen={setInstallOpen} title="Beauty di layar utamamu" description="Buka aplikasi lebih cepat tanpa mengetik alamat website."><div className="install-instructions"><h3>iPhone / iPad</h3><p>Buka melalui Safari, ketuk Bagikan, lalu pilih Tambahkan ke Layar Utama.</p><h3>Android / desktop</h3><p>Buka menu browser, pilih Instal aplikasi atau Tambahkan ke layar utama. Opsi muncul jika browser mendukung dan situs diakses lewat HTTPS.</p></div></Modal>
-  <Modal open={accountOpen} setOpen={setAccountOpen} title="Akun kamu" description="Kartu member, pemasangan aplikasi, dan keluar dari sesi ini."><div className="account-identity"><span className="avatar">{initials(member.name)}</span><span><strong>{member.name}</strong><small>{member.tier} member · {member.card}</small></span></div><div className="account-actions"><button onClick={() => { setAccountOpen(false); void install(); }} disabled={installed}><DownloadSimple size={20} /><span>{installed ? 'Aplikasi sudah terpasang' : 'Pasang aplikasi'}</span><CaretRight size={15} /></button><button onClick={() => { setAccountOpen(false); setHelpOpen(true); }}><Info size={20} /><span>Butuh bantuan?</span><CaretRight size={15} /></button></div><button className="button secondary full account-logout" onClick={logout}><SignOut size={19} />Keluar</button></Modal>
+  <Modal open={accountOpen} setOpen={setAccountOpen} className="account-modal" title="Profil kamu" description="Atur foto dan akses akunmu di satu tempat.">
+   <section className="account-profile" aria-label="Ringkasan profil">
+    <button type="button" className="profile-avatar-button" onClick={() => avatarInputRef.current?.click()} disabled={avatarBusy} aria-label={avatarPhoto ? 'Ganti foto profil' : 'Tambahkan foto profil'}>
+     <span className={`avatar account-avatar ${avatarPhoto ? 'has-photo' : ''}`}>{avatarContent(avatarPhoto, member.name, () => setAvatarPhoto(null))}</span>
+     <span className="profile-avatar-badge" aria-hidden="true"><CameraIcon size={14} weight="fill" /></span>
+    </button>
+    <span className="account-profile-copy"><strong>{member.name}</strong><span>{member.tier} MEMBER</span><small>No. member {member.card}</small></span>
+   </section>
+   <input ref={avatarInputRef} hidden type="file" accept="image/jpeg,image/png,image/webp" onChange={changeAvatar} aria-label="Pilih foto profil" />
+   <button type="button" className="button primary full profile-photo-cta" onClick={() => avatarInputRef.current?.click()} disabled={avatarBusy}>
+    <CameraIcon size={19} weight="fill" />{avatarBusy ? 'Mengunggah foto…' : avatarPhoto ? 'Ganti foto profil' : 'Pilih foto profil'}
+   </button>
+   <div className="profile-photo-meta"><span>JPG, PNG, atau WebP · maks. 8 MB</span><span><ShieldCheck size={14} weight="fill" />Tersimpan privat</span></div>
+   {avatarError && <p className="form-error profile-photo-feedback" role="alert"><WarningCircle size={17} />{avatarError}</p>}
+   {avatarMessage && <p className="profile-photo-success" role="status"><CheckCircle size={17} weight="fill" />{avatarMessage}</p>}
+   {avatarPhoto && <button type="button" className="profile-photo-remove" onClick={removeAvatar} disabled={avatarBusy}><TrashSimpleIcon size={16} />Hapus foto</button>}
+   <span className="account-section-label">PENGATURAN</span>
+   <div className="account-actions">
+    <button type="button" onClick={() => { setAccountOpen(false); void install(); }} disabled={installed}><span className="account-action-icon"><DownloadSimple size={19} /></span><span className="account-action-copy"><strong>{installed ? 'Aplikasi sudah terpasang' : 'Pasang aplikasi'}</strong><small>Akses Beauty lebih cepat</small></span><CaretRight size={16} /></button>
+    <button type="button" onClick={() => { setAccountOpen(false); setHelpOpen(true); }}><span className="account-action-icon"><Info size={19} /></span><span className="account-action-copy"><strong>Butuh bantuan?</strong><small>Hubungi tim Beauty Kendari</small></span><CaretRight size={16} /></button>
+   </div>
+   <button type="button" className="account-logout" onClick={logout}><SignOut size={17} />Keluar dari akun</button>
+  </Modal>
   <Modal open={selection !== null} setOpen={open => { if (!open) setSelection(null); }} title="Detail transaksi" description={selection ? dateLabel(selection.date) : ''}>{selection && <><div className="transaction-detail"><span className="circle-icon"><Receipt size={28} /></span><h3>{selection.title}</h3><strong className={selection.points > 0 ? 'positive' : ''}>{selection.points > 0 ? '+' : ''}{number(selection.points)} poin</strong></div><dl className="detail-list"><div><dt>No. transaksi</dt><dd>{selection.id}</dd></div><div><dt>Outlet</dt><dd>{selection.outlet}</dd></div><div><dt>Nominal belanja</dt><dd>{selection.amount ? rupiah(selection.amount) : 'Tidak berlaku'}</dd></div></dl>{demo && <p className="demo-disclaimer">Data transaksi contoh untuk pratinjau frontend.</p>}</>}</Modal>
  </div>;
 }
@@ -103,7 +208,7 @@ function History({ compact = false, demo, failed, transactions, onSelect }: { co
  : <><div className="transaction-list">{shown.length ? shown.map((t, index) => <button className="transaction-row" key={`${t.id}-${index}`} onClick={() => onSelect(t)}><span className={`transaction-icon ${t.points < 0 ? 'spent' : ''}`}>{t.points > 0 ? <Bag size={21} /> : <Gift size={21} />}</span><span className="transaction-info"><strong>{t.title}</strong><small>{dateLabel(t.date)}<span className="transaction-amount"> · {t.amount ? rupiah(t.amount) : 'Penukaran di outlet'}</span></small></span><span className={`transaction-points ${t.points > 0 ? 'positive' : ''}`}>{t.points > 0 ? '+' : ''}{number(t.points)}<small>poin</small></span><CaretRight className="transaction-chevron" size={15} /></button>) : <div className="empty-state"><Receipt size={35} /><h3>Belum ada riwayat transaksi</h3><p>{filtersActive ? 'Tidak ada transaksi pada filter ini.' : 'Transaksi poinmu akan muncul di sini setelah belanja di outlet.'}</p>{filtersActive && <button className="text-link" onClick={() => { setFilter('all'); setMonth('all'); }}>Tampilkan semua transaksi</button>}</div>}</div>{!compact && filtered.length > visible && <button className="button secondary load-more" onClick={() => setVisible(visible + 5)}>Muat lebih banyak <ArrowDown size={17} /></button>}</>}
  {!compact && <div className="history-footnote"><Info size={14} />Penukaran poin dilakukan langsung di kasir outlet.</div>}</section>;
 }
-function InfoPage({ onQr }: { onQr: () => void }) { return <div className="info-layout"><div><section className="redemption-panel" aria-labelledby="redemption-title"><span className="circle-icon"><Gift size={24} /></span><h2 id="redemption-title">Pilihan penukaran poin</h2><p>Tukar poinmu saat berbelanja langsung di outlet.</p><table className="redemption-table"><caption className="sr-only">Jumlah poin dan nilai penukaran</caption><thead><tr><th scope="col">Poin ditukar</th><th scope="col">Nilai penukaran</th></tr></thead><tbody>{redemptionOptions.map(option => <tr key={option.points}><th scope="row">{number(option.points)} <span>poin</span></th><td>{rupiah(option.value)}</td></tr>)}</tbody></table><span className="redemption-note"><Info size={16} />Penukaran diproses oleh kasir dengan kartu membermu.</span></section><section className="faq-section"><h2>Yang perlu kamu tahu</h2>{terms.map((term, i) => <details key={term.title} open={i === 0}><summary>{term.title}<CaretDown size={19} /></summary><p>{term.text}</p></details>)}</section></div><aside className="info-aside"><span className="circle-icon"><Gift size={29} /></span><h2>Siap menukar poin?</h2><p>Tunjukkan kartu membermu saat berbelanja. Kasir akan membantu penukarannya.</p><button className="button primary full" onClick={onQr}><QrCode size={20} />Tampilkan kartu</button><div className="simple-steps"><span><CheckCircle size={18} />Datang ke outlet</span><span><CheckCircle size={18} />Tunjukkan kartu member</span><span><CheckCircle size={18} />Konfirmasi penukaran ke kasir</span></div></aside></div>; }
+function InfoPage({ onQr }: { onQr: () => void }) { return <div className="info-layout"><div><section className="redemption-panel" aria-labelledby="redemption-title"><span className="circle-icon"><Gift size={24} /></span><h2 id="redemption-title">Pilihan penukaran poin</h2><p>Tukar poinmu saat berbelanja langsung di outlet.</p><table className="redemption-table"><caption className="sr-only">Jumlah poin dan nilai penukaran</caption><thead><tr><th scope="col">Poin ditukar</th><th scope="col">Nilai penukaran</th></tr></thead><tbody>{redemptionOptions.map(option => <tr key={option.points}><th scope="row">{number(option.points)} <span>poin</span></th><td>{rupiah(option.value)}</td></tr>)}</tbody></table><span className="redemption-note"><Info size={16} />Penukaran diproses oleh kasir dengan kartu membermu.</span></section><section className="faq-section"><h2>Yang perlu kamu tahu</h2>{terms.map((term, i) => <details key={term.title} open={i === 0}><summary>{term.title}<CaretDown size={19} /></summary><p>{term.text}</p></details>)}</section></div><aside className="info-aside"><span className="circle-icon"><Gift size={29} /></span><h2>Siap menukar poin?</h2><p>Tunjukkan kartu membermu saat berbelanja. Kasir akan membantu penukarannya.</p><button className="button primary full" onClick={onQr}><BarcodeIcon size={20} />Tampilkan kartu</button><div className="simple-steps"><span><CheckCircle size={18} />Datang ke outlet</span><span><CheckCircle size={18} />Tunjukkan kartu member</span><span><CheckCircle size={18} />Konfirmasi penukaran ke kasir</span></div></aside></div>; }
 
 export function Login({ demo, notice, sample }: { demo: boolean; notice?: string; sample?: Member }) {
  const router = useRouter(); const [input, setInput] = useState(''); const [error, setError] = useState(notice ?? ''); const [loading, setLoading] = useState(false);

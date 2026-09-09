@@ -290,6 +290,19 @@ a { color: inherit; text-decoration: none; }
 
 .small-avatar { width: 34px; height: 34px; font-size: 11.5px; }
 
+.avatar.has-photo {
+  overflow: hidden;
+  background: var(--surface-3);
+}
+
+.avatar-photo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  object-fit: cover;
+}
+
 .circle-icon {
   display: grid;
   place-items: center;
@@ -1762,59 +1775,175 @@ main {
 .account-button { cursor: pointer; transition: transform 0.16s var(--ease), box-shadow 0.16s var(--ease); }
 .account-button:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); }
 
-.account-identity {
+.account-modal {
+  gap: 12px;
+  padding-bottom: calc(20px + env(safe-area-inset-bottom));
+}
+
+.account-modal > h2 { letter-spacing: -0.025em; }
+
+.account-profile {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
+  padding: 5px 2px 6px;
+}
+
+.profile-avatar-button {
+  position: relative;
+  flex: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.18s var(--ease);
+}
+
+.profile-avatar-button:hover:not(:disabled) { transform: translateY(-1px); }
+.profile-avatar-button:disabled { cursor: wait; opacity: 0.72; }
+
+.account-avatar {
+  width: 68px;
+  height: 68px;
+  border: 3px solid var(--surface);
+  box-shadow: 0 0 0 1px var(--line-soft), 0 10px 24px -16px rgba(100, 17, 57, 0.7);
+  font-size: 18px;
+}
+
+.profile-avatar-badge {
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  display: grid;
+  width: 27px;
+  height: 27px;
+  place-items: center;
+  border: 3px solid var(--surface);
+  border-radius: 50%;
+  background: var(--pink);
+  color: #fff;
+  box-shadow: var(--shadow-xs);
+}
+
+.account-profile-copy { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; min-width: 0; }
+.account-profile-copy strong { max-width: 100%; overflow: hidden; color: var(--ink); font-size: 16px; text-overflow: ellipsis; white-space: nowrap; }
+.account-profile-copy > span {
+  padding: 3px 7px;
+  border-radius: var(--r-pill);
+  background: var(--veil);
+  color: var(--pink-deep);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+.account-profile-copy small { max-width: 100%; overflow: hidden; color: var(--muted); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+
+.profile-photo-cta { min-height: 48px; }
+.profile-photo-cta:disabled { cursor: wait; opacity: 0.68; }
+
+.profile-photo-meta {
   display: flex;
   align-items: center;
-  gap: 13px;
-  padding: 15px;
+  justify-content: space-between;
+  gap: 8px 14px;
+  color: var(--faint);
+  font-size: 10.5px;
+  line-height: 1.4;
+}
+
+.profile-photo-meta span:last-child { display: inline-flex; align-items: center; gap: 4px; color: var(--positive); white-space: nowrap; }
+
+.profile-photo-remove {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: -4px;
+  padding: 4px 2px;
+  color: var(--danger);
+  font-size: 11.5px;
+  font-weight: 650;
+}
+
+.profile-photo-remove:disabled { cursor: wait; opacity: 0.55; }
+
+.account-section-label {
+  margin: 5px 2px -4px;
+  color: var(--faint);
+  font-size: 9px;
+  font-weight: 750;
+  letter-spacing: 0.14em;
+}
+
+.account-actions {
+  display: flex;
+  overflow: hidden;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid var(--line-soft);
   border-radius: var(--r-lg);
   background: var(--surface-2);
-  border: 1px solid var(--line-soft);
 }
-
-.account-identity > span:nth-child(2) { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-.account-identity strong { font-size: 15px; }
-.account-identity small {
-  color: var(--muted);
-  font-size: 12.5px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.account-actions { display: flex; flex-direction: column; gap: 2px; }
 
 .account-actions button {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 11px;
   width: 100%;
-  padding: 14px 12px;
-  border-radius: var(--r-md);
+  min-height: 58px;
+  padding: 10px 12px;
   text-align: left;
-  font-size: 14px;
-  font-weight: 600;
   transition: background 0.16s var(--ease);
 }
 
-.account-actions button + button { box-shadow: 0 -1px 0 var(--line-soft); }
-.account-actions button:hover:not(:disabled) { background: var(--surface-2); box-shadow: none; }
-.account-actions button:hover:not(:disabled) + button { box-shadow: none; }
+.account-actions button + button { border-top: 1px solid var(--line-soft); }
+.account-actions button:hover:not(:disabled) { background: var(--surface); }
 .account-actions button:disabled { color: var(--faint); cursor: not-allowed; }
-.account-actions button > svg:first-child { flex: none; color: var(--pink); }
-.account-actions button:disabled > svg:first-child { color: var(--faint); }
-.account-actions span { flex: 1; min-width: 0; }
 .account-actions button > svg:last-child { flex: none; color: var(--faint); }
 
-/* Outranks .button.secondary, which would otherwise reset the colour. */
-.button.secondary.account-logout {
-  color: var(--danger);
-  border-color: color-mix(in srgb, var(--danger) 26%, transparent);
+.account-action-icon {
+  display: grid;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--veil);
+  color: var(--pink-deep);
 }
 
-.button.secondary.account-logout:hover {
+.account-actions button:disabled .account-action-icon { color: var(--faint); }
+.account-action-copy { display: flex; flex: 1; min-width: 0; flex-direction: column; gap: 2px; }
+.account-action-copy strong { overflow: hidden; color: var(--ink); font-size: 13.5px; font-weight: 680; text-overflow: ellipsis; white-space: nowrap; }
+.account-action-copy small { overflow: hidden; color: var(--muted); font-size: 11px; font-weight: 450; text-overflow: ellipsis; white-space: nowrap; }
+.account-actions button:disabled .account-action-copy strong,
+.account-actions button:disabled .account-action-copy small { color: var(--faint); }
+
+.profile-photo-feedback { margin: -2px 0 0; }
+
+.profile-photo-success {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: -2px 0 0;
+  color: var(--positive);
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.account-logout {
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 12px;
+  color: var(--danger);
+  font-size: 12.5px;
+  font-weight: 650;
+  transition: background 0.16s var(--ease), color 0.16s var(--ease);
+}
+
+.account-logout:hover {
   background: var(--danger-bg);
-  border-color: var(--danger);
   color: var(--danger);
 }
 
