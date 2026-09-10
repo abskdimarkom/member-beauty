@@ -1036,7 +1036,7 @@ main {
 .history-footnote svg { flex: none; }
 
 /* ========================================================================
-   Banner + outlet note
+   Banner + community note
    ======================================================================== */
 
 .right-column { display: flex; flex-direction: column; gap: 16px; }
@@ -1118,6 +1118,8 @@ main {
 .outlet-note strong { font-size: 14px; }
 .outlet-note small { color: var(--muted); font-size: 12.5px; }
 .outlet-note > svg:last-child { flex: none; color: var(--faint); }
+.community-note .circle-icon { color: #168a4b; background: color-mix(in srgb, #168a4b 10%, var(--surface)); }
+.community-note:hover { border-color: color-mix(in srgb, #168a4b 35%, var(--line)); }
 
 /* ========================================================================
    Info penukaran
@@ -1231,6 +1233,25 @@ main {
 }
 
 .simple-steps svg { flex: none; color: var(--pink); }
+
+.community-link {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  margin-top: 2px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line-soft);
+  color: var(--ink-soft);
+  font-size: 12px;
+  font-weight: 600;
+  transition: color 0.18s var(--ease);
+}
+
+.community-link:hover { color: var(--pink-deep); }
+.community-link > svg { flex: none; }
+.community-link > svg:first-child { color: #1c9a56; }
+.community-link > span { flex: 1; min-width: 0; }
 
 /* ========================================================================
    Modal
