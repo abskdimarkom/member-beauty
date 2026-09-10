@@ -1271,6 +1271,12 @@ main {
 
 .modal-close { position: absolute; top: 16px; right: 14px; }
 
+.modal-card { border-radius: var(--r-lg); }
+
+.modal-card .membership-card { min-height: 0; border-radius: var(--r-lg); box-shadow: none; }
+
+.modal-card .card-qr:hover { transform: none; }
+
 .large-qr {
   display: grid;
   place-items: center;
@@ -2046,4 +2052,20 @@ main {
   .history-page .filter-tabs { width: 100%; }
   .history-page .filter-tabs button { flex: 1; padding-left: 8px; padding-right: 8px; }
   .history-page .transaction-info small { font-size: 11px; }
+}
+
+/* Download controls for the original membership card. */
+.emember { min-width: 0; }
+.emember-actions { display: flex; gap: 10px; margin-top: 18px; }
+.emember-actions .button { flex: 1; min-width: 0; padding-inline: 12px; font-size: 13px; }
+.emember-actions .primary:disabled { opacity: .65; cursor: wait; }
+.emember-hint { margin: 10px 0 0; color: var(--muted); font-size: 11px; text-align: center; line-height: 1.6; }
+@media (max-width: 380px) {
+  .emember-actions { gap: 8px; }
+  .emember-actions .button { font-size: 11px; padding-inline: 8px; gap: 6px; }
+}
+@media (max-width: 380px) {
+  .home-page .lower-grid > * { min-width: 0; }
+  .home-page .outlet-note { gap: 8px; }
+  .home-page .outlet-note > span:nth-child(2) { min-width: 0; }
 }
