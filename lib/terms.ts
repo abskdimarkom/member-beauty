@@ -1,4 +1,5 @@
 // Pilihan penukaran yang dikonfirmasi oleh Beauty Kendari.
+export const COMMUNITY_URL = 'https://chat.whatsapp.com/HV27mH1MeLlKPQkGFcTbyx';
 export const redemptionOptions = [
  { points: 100, value: 10000 },
  { points: 200, value: 20000 },

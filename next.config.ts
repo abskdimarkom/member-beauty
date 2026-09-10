@@ -10,6 +10,9 @@ const config: NextConfig = {
    * build:check` points the build at its own directory instead.
    */
   distDir: process.env.NEXT_DIST_DIR || '.next',
+  // Icons are imported by name from one barrel; without this every client
+  // bundle pulls the whole set.
+  experimental: { optimizePackageImports: ['@phosphor-icons/react'] },
 };
 
 export default config;

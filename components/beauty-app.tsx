@@ -1,21 +1,22 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent, type KeyboardEvent, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ChangeEvent, type KeyboardEvent, type ReactNode } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import * as Dialog from '@radix-ui/react-dialog';
+import { Brand } from '@/components/brand';
 import { MemberCard } from '@/components/member-card';
-import { ArrowClockwise, ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, Bag, BarcodeIcon, CalendarBlank, CameraIcon, CaretDown, CaretRight, Check, CheckCircle, Clock, Copy, DeviceMobile, DownloadSimple, Gift, Heart, House, Info, Moon, Receipt, ShieldCheck, SignOut, Sparkle, Sun, TrashSimpleIcon, WarningCircle, WhatsappLogo, X } from '@phosphor-icons/react';
+import { ThemeButton } from '@/components/theme-button';
+import { ArrowClockwise, ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, Bag, BarcodeIcon, CalendarBlank, CameraIcon, CaretDown, CaretRight, Check, CheckCircle, Clock, DeviceMobile, DownloadSimple, Gift, Heart, House, Info, Receipt, ShieldCheck, SignOut, Sparkle, TrashSimpleIcon, WarningCircle, WhatsappLogo, X } from '@phosphor-icons/react';
 import { dateLabel, number, rupiah } from '@/lib/format';
 import type { PageData } from '@/lib/load';
-import type { Member, Transaction } from '@/lib/types';
-import { redemptionOptions, terms } from '@/lib/terms';
+import type { Transaction } from '@/lib/types';
+import { COMMUNITY_URL, redemptionOptions, terms } from '@/lib/terms';
 
 type Page = 'home' | 'history' | 'info';
 type InstallPrompt = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> };
 const navigation = [{ href: '/', label: 'Beranda', icon: House, page: 'home' }, { href: '/riwayat', label: 'Riwayat poin', icon: Clock, page: 'history' }, { href: '/info', label: 'Info penukaran', icon: Gift, page: 'info' }];
-const COMMUNITY_URL = 'https://chat.whatsapp.com/HV27mH1MeLlKPQkGFcTbyx';
 const initials = (name: string) => name.split(/\s+/).slice(0, 2).map(word => word[0] ?? '').join('').toUpperCase() || 'B';
 const MAX_PROFILE_PHOTO_SIZE = 8 * 1024 * 1024;
 const PROFILE_PHOTO_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
@@ -65,9 +66,7 @@ function prepareProfilePhoto(file: File): Promise<Blob> {
 /** Months offered by the history filter: the current month and the eleven before it. */
 function monthOptions() { const now = new Date(); return Array.from({ length: 12 }, (_, index) => { const date = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - index, 1)); return { value: date.toISOString().slice(0, 7), label: new Intl.DateTimeFormat('id-ID', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(date) }; }); }
 
-export function Brand({ light = false }: { light?: boolean }) { return <span className={`brand ${light ? 'brand-light' : ''}`}><Image className="brand-symbol" src="/logo.png" alt="" width={591} height={548} sizes="44px" /><span className="brand-type">beauty<span>KENDARI</span></span></span>; }
 function Modal({ open, setOpen, title, description, children, className = '' }: { open: boolean; setOpen: (open: boolean) => void; title: string; description: string; children: ReactNode; className?: string }) { return <Dialog.Root open={open} onOpenChange={setOpen}><Dialog.Portal><Dialog.Overlay className="modal-overlay" /><Dialog.Content className={`modal-content ${className}`}><Dialog.Close className="icon-button modal-close" aria-label="Tutup"><X size={21} /></Dialog.Close><Dialog.Title>{title}</Dialog.Title><Dialog.Description>{description}</Dialog.Description>{children}</Dialog.Content></Dialog.Portal></Dialog.Root>; }
-function ThemeButton() { const [dark, setDark] = useState(false); useEffect(() => { const value = localStorage.getItem('beauty-theme'); const next = value ? value === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches; setDark(next); document.documentElement.dataset.theme = next ? 'dark' : 'light'; }, []); return <button className="icon-button theme-button" aria-label={dark ? 'Aktifkan mode terang' : 'Aktifkan mode gelap'} onClick={() => { setDark(!dark); document.documentElement.dataset.theme = dark ? 'light' : 'dark'; localStorage.setItem('beauty-theme', dark ? 'light' : 'dark'); }}>{dark ? <Sun size={21} /> : <Moon size={21} />}</button>; }
 
 export function BeautyApp({ page, data }: { page: Page; data: PageData }) {
  const { member, transactions, demo, historyFailed } = data;
@@ -212,56 +211,4 @@ function History({ compact = false, demo, failed, transactions, onSelect }: { co
 function InfoPage({ onQr }: { onQr: () => void }) {
  const [openFaq, setOpenFaq] = useState<number | null>(0);
  return <div className="info-layout"><div><section className="redemption-panel" aria-labelledby="redemption-title"><span className="circle-icon"><Gift size={24} /></span><h2 id="redemption-title">Pilihan penukaran poin</h2><p>Tukar poinmu saat berbelanja langsung di outlet.</p><table className="redemption-table"><caption className="sr-only">Jumlah poin dan nilai penukaran</caption><thead><tr><th scope="col">Poin ditukar</th><th scope="col">Nilai penukaran</th></tr></thead><tbody>{redemptionOptions.map(option => <tr key={option.points}><th scope="row">{number(option.points)} <span>poin</span></th><td>{rupiah(option.value)}</td></tr>)}</tbody></table><span className="redemption-note"><Info size={16} />Penukaran diproses oleh kasir dengan kartu membermu.</span></section><section className="faq-section"><h2>Yang perlu kamu tahu</h2>{terms.map((term, i) => <details key={term.title} open={openFaq === i} onToggle={event => { if (event.currentTarget.open) setOpenFaq(i); else setOpenFaq(current => current === i ? null : current); }}><summary>{term.title}<CaretDown size={19} /></summary><p>{term.text}</p></details>)}</section></div><aside className="info-aside"><span className="circle-icon"><Gift size={29} /></span><h2>Siap menukar poin?</h2><p>Tunjukkan kartu membermu saat berbelanja. Kasir akan membantu penukarannya.</p><button className="button primary full" onClick={onQr}><BarcodeIcon size={20} />Tampilkan kartu</button><div className="simple-steps"><span><CheckCircle size={18} />Datang ke outlet</span><span><CheckCircle size={18} />Tunjukkan kartu member</span><span><CheckCircle size={18} />Konfirmasi penukaran ke kasir</span></div><a className="community-link" href={COMMUNITY_URL} target="_blank" rel="noreferrer"><WhatsappLogo size={20} weight="fill" /><span>Komunitas member</span><ArrowUpRight size={16} /></a></aside></div>;
-}
-
-export function Login({ demo, notice, sample }: { demo: boolean; notice?: string; sample?: Member }) {
- const router = useRouter(); const [input, setInput] = useState(''); const [error, setError] = useState(notice ?? ''); const [loading, setLoading] = useState(false);
- async function submit(event: FormEvent) {
-  event.preventDefault(); setError('');
-  if (!input.trim()) { setError('Masukkan nomor HP atau nomor kartu terlebih dahulu.'); return; }
-  setLoading(true);
-  try {
-   const response = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ value: input.trim() }) });
-   const body = (await response.json()) as { ok?: boolean; error?: string };
-   if (!response.ok || !body.ok) { setError(body.error ?? 'Gagal masuk. Coba lagi sebentar lagi.'); setLoading(false); return; }
-   router.replace('/'); router.refresh();
-  } catch { setError('Tidak bisa terhubung. Periksa koneksi internetmu lalu coba lagi.'); setLoading(false); }
- }
- return (
-  <div className="login-page">
-   <header className="login-top">
-    <Link href="/" aria-label="Beauty Kendari"><Brand /></Link>
-    <div className="login-top-actions">
-     {demo && <Link href="/" className="text-link">Lihat demo <ArrowUpRight size={15} /></Link>}
-     <ThemeButton />
-    </div>
-   </header>
-   <section className="login-visual" aria-label="Beauty Kendari">
-    <Image src="/beauty-still-life.webp" alt="Koleksi skincare dan kosmetik Beauty Kendari" fill priority sizes="(max-width: 899px) 100vw, 48vw" />
-    <div className="login-intro">
-     <span className="login-eyebrow">SEBUAH RUANG UNTUK DIRIMU</span>
-     <h2>Cantikmu,<br /><em>begitu berarti.</em></h2>
-     <p>Hal baik dimulai dari merawat diri.</p>
-    </div>
-   </section>
-   <section className="login-form-section" aria-labelledby="login-title">
-    <div className="login-form-wrap">
-     <span className="login-form-eyebrow">BEAUTY MEMBER</span>
-     <h1 id="login-title">Selamat datang.</h1>
-     <p className="login-description">Kartu dan poin membermu, dalam satu tempat.</p>
-     <form onSubmit={submit} aria-busy={loading}>
-      <label htmlFor="member-number">Nomor HP atau nomor kartu</label>
-      <input id="member-number" name="member-number" inputMode="numeric" autoComplete="tel" placeholder="Masukkan nomor terdaftar" value={input} onChange={e => { setInput(e.target.value); setError(''); }} aria-invalid={!!error} aria-describedby={error ? 'login-error' : 'login-helper'} disabled={loading} />
-      <small id="login-helper">Gunakan nomor yang terdaftar di Beauty Kendari.</small>
-      {error && <p id="login-error" className="form-error" role="alert"><WarningCircle size={17} />{error}</p>}
-      <button className="button primary full" disabled={loading}>{loading ? 'Memeriksa nomor…' : 'Masuk'}{!loading && <ArrowRight size={19} />}</button>
-     </form>
-     <span className="login-assurance"><ShieldCheck size={15} />Masuk praktis, tanpa password.</span>
-     {demo && sample && <div className="demo-login"><Info size={19} /><div><strong>Pratinjau frontend</strong><p>Belum terhubung ke data member asli.</p><button type="button" className="text-link" onClick={() => { setInput(sample.phone); setError(''); }}>Gunakan nomor demo <Copy size={14} /></button></div></div>}
-     <p className="registration-note">Belum menjadi member?<span>Daftar langsung di kasir outlet Beauty Kendari.</span></p>
-    </div>
-    <footer className="login-footer">© {new Date().getFullYear()} Beauty Kendari</footer>
-   </section>
-  </div>
- );
 }

@@ -4,7 +4,7 @@ import { useEffect, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowClockwise, WarningCircle } from '@phosphor-icons/react';
 
-import { Brand } from '@/components/beauty-app';
+import { Brand } from '@/components/brand';
 
 export default function Error({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   const router = useRouter();

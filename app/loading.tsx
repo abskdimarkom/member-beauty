@@ -1,4 +1,4 @@
-import { Brand } from '@/components/beauty-app';
+import { Brand } from '@/components/brand';
 
 /** Explicit loading state for every member page fetch (PRD §6.1). */
 export default function Loading() {
