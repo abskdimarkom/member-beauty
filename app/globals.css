@@ -1502,6 +1502,39 @@ a { color: inherit; text-decoration: none; }
 .registration-note { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--ink-soft); font-size: 12px; line-height: 1.8; }
 .registration-note span { display: block; color: var(--muted); }
 
+/* The way out for a member the login rejects. It carries a surface of its own so
+   it reads as something to tap, not another line of footer small print. */
+.login-help {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-top: 14px;
+  padding: 12px 13px;
+  border-radius: var(--r-lg);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  color: var(--ink-soft);
+  transition: border-color 0.18s var(--ease), background 0.18s var(--ease);
+}
+
+.login-help:hover { border-color: var(--line-pink); background: var(--veil); }
+.login-help > span:nth-child(2) { flex: 1; }
+.login-help strong { display: block; font-size: 13px; }
+.login-help small { display: block; margin-top: 2px; color: var(--muted); font-size: 11.5px; }
+.login-help > svg { flex: none; color: var(--muted); }
+
+.login-help-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: var(--r-sm);
+  background: linear-gradient(150deg, var(--veil-strong), var(--veil));
+  border: 1px solid var(--line-pink);
+  color: var(--pink-deep);
+}
+
 @media (min-width: 600px) {
   /* Centred card once there is room for one. */
   .login-dialog { margin: auto; }
@@ -2167,21 +2200,6 @@ html { scroll-behavior: smooth; }
   padding-block: clamp(24px, 4vw, 44px) var(--section-space);
 }
 
-.landing-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 7px 13px;
-  border-radius: var(--r-pill);
-  background: var(--veil);
-  border: 1px solid var(--line-pink);
-  color: var(--pink-deep);
-  font-size: 10.5px;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
 .landing-headline {
   max-width: 24ch;
   margin-top: 20px;
@@ -2246,7 +2264,6 @@ html { scroll-behavior: smooth; }
   from { opacity: 0; transform: translate3d(0, 0.42em, 0); }
 }
 
-.landing-hero-copy > .landing-eyebrow { animation: landing-fade-up 0.45s var(--ease) backwards; }
 .landing-hero-copy > .landing-lead { animation: landing-fade-up 0.5s var(--ease) 0.26s backwards; }
 .landing-hero-copy > .landing-cta { animation: landing-fade-up 0.5s var(--ease) 0.34s backwards; }
 .landing-hero-copy > .landing-trust { animation: landing-fade-up 0.5s var(--ease) 0.42s backwards; }
@@ -2261,7 +2278,6 @@ html { scroll-behavior: smooth; }
   .landing-word,
   .landing-rotator,
   .landing-rotator-track,
-  .landing-hero-copy > .landing-eyebrow,
   .landing-hero-copy > .landing-lead,
   .landing-hero-copy > .landing-cta,
   .landing-hero-copy > .landing-trust { animation: none; }
@@ -2726,6 +2742,45 @@ html { scroll-behavior: smooth; }
 .landing-community-copy p { max-width: 46ch; margin-top: 16px; color: rgba(255, 255, 255, 0.85); font-size: clamp(14.5px, 3.8vw, 16px); line-height: 1.7; }
 .landing-community-copy .button { min-height: 52px; margin-top: 26px; }
 
+/* These sit straight on the photograph, so each perk carries its own translucent
+   pane — bare white text survives the dark left third and falls apart over the
+   bottles. The width cap is the same story: on desktop the overlay fades to 0.28
+   on the right, so the list has to stay inside the dark side of the gradient. */
+.landing-perks {
+  display: grid;
+  gap: 10px;
+  max-width: 44ch;
+  margin-top: 22px;
+  padding: 0;
+  list-style: none;
+}
+
+.landing-perks li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 15px;
+  border-radius: var(--r-lg);
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  font-size: clamp(14px, 3.6vw, 15px);
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.landing-perk-icon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border-radius: var(--r-sm);
+  background: #fff;
+  color: var(--pink-deep);
+}
+
 /* --------------------------------------------------------- faq + foot */
 
 .landing-faq-section .faq-section { border-radius: var(--r-xl); }
@@ -2783,8 +2838,36 @@ html { scroll-behavior: smooth; }
 }
 
 @media (min-width: 1100px) {
-  /* Six cards read as two tidy rows rather than three stubby ones. */
-  .landing-section:not(.landing-split) .landing-features { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  /* Four cards fit one clean row. At this width a tile beats a row: standing the
+     icon above the copy lets the text use the full card instead of leaving a
+     column of dead space beside it, and the grid keeps every tile the same
+     height however many lines the copy runs to. */
+  .landing-section:not(.landing-split) .landing-features { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+  .landing-section:not(.landing-split) .landing-features li {
+    flex-direction: column;
+    gap: 15px;
+    padding: 22px 20px 24px;
+  }
+
+  .landing-section:not(.landing-split) .landing-feature-icon { width: 44px; height: 44px; }
+
+  /* Stacked, the three perks left three-fifths of the photograph empty and pushed
+     the band past 640px — most of a laptop screen. One row of tiles spends that
+     height on width instead, so the copy reaches across the dark half of the
+     gradient rather than hugging the left edge. */
+  .landing-perks {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    max-width: 760px;
+    gap: 12px;
+  }
+
+  .landing-perks li {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px 16px 18px;
+  }
 }
 
 @media (min-width: 1200px) {

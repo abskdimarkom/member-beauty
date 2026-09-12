@@ -1,5 +1,12 @@
 // Pilihan penukaran yang dikonfirmasi oleh Beauty Kendari.
 export const COMMUNITY_URL = 'https://chat.whatsapp.com/HV27mH1MeLlKPQkGFcTbyx';
+
+// Admin WhatsApp untuk member yang gagal masuk. wa.me menolak format lokal, jadi
+// angka 0 di depan ditulis 62. Pesan awal sudah diisi supaya member tinggal kirim.
+const HELP_WHATSAPP = '6285126438727';
+export const HELP_WHATSAPP_DISPLAY = '0851-2643-8727';
+export const HELP_WHATSAPP_URL =
+ `https://wa.me/${HELP_WHATSAPP}?text=${encodeURIComponent('Halo, saya nggak bisa masuk ke akun member Beauty Kendari.')}`;
 export const redemptionOptions = [
  { points: 100, value: 10000 },
  { points: 200, value: 20000 },

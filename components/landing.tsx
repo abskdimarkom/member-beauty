@@ -2,9 +2,9 @@ import { Fragment, type CSSProperties } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
-  ArrowRight, ArrowUpRight, Barcode, CalendarBlank, Camera, CaretDown, CheckCircle, Clock, Copy,
-  Crown, DeviceMobile, DownloadSimple, FunnelSimple, Gift, Heart, House, Info, ListMagnifyingGlass,
-  LockKey, Moon, Receipt, ShieldCheck, Sparkle, WhatsappLogo, WifiSlash,
+  ArrowRight, ArrowUpRight, Barcode, Camera, CaretDown, CheckCircle, Clock, Copy,
+  Crown, DeviceMobile, DownloadSimple, Gift, Heart, House, Info, ListMagnifyingGlass,
+  LockKey, Moon, Percent, Receipt, ShieldCheck, Sparkle, Ticket, WhatsappLogo, WifiSlash,
 } from '@phosphor-icons/react/ssr';
 import type { Icon } from '@phosphor-icons/react';
 import { Brand } from '@/components/brand';
@@ -19,31 +19,42 @@ import type { Member } from '@/lib/types';
 
 type Feature = [icon: Icon, text: string];
 
+/* Kept short and scannable on purpose: one idea per line, no line longer than a
+   phone can read at a glance. Detail belongs in the app, not on the landing. */
 const cardFeatures: Feature[] = [
-  [Barcode, 'Barcode langsung kebaca mesin kasir, nggak perlu ketik nomor manual'],
-  [DownloadSimple, 'Simpan kartunya ke galeri HP, jadi tetap bisa dipakai walau lagi nggak ada sinyal'],
-  [Copy, 'Nomor kartu bisa disalin sekali ketuk'],
-  [Camera, 'Pasang foto profil sendiri di kartu kamu'],
-  [CalendarBlank, 'Tanggal aktif kartu kelihatan jelas, nggak perlu nebak-nebak'],
-  [DeviceMobile, 'Bisa dipasang di layar utama HP kayak aplikasi biasa — sekali ketuk langsung kebuka'],
+  [Barcode, 'Barcode langsung discan kasir'],
+  [DownloadSimple, 'Simpan ke galeri, tetap jalan offline'],
+  [Camera, 'Pasang foto profil di kartumu'],
+  [DeviceMobile, 'Pasang di layar utama HP'],
 ];
 
 const pointFeatures: Feature[] = [
-  [Sparkle, 'Saldo poin muncul paling depan pas kamu buka aplikasi'],
-  [Receipt, 'Semua poin masuk dan poin yang udah kamu tukar, tercatat rapi'],
-  [FunnelSimple, 'Cari transaksi bulan tertentu? Tinggal filter'],
-  [ListMagnifyingGlass, 'Ketuk transaksinya buat lihat detail: outlet mana, belanja berapa, dapat poin berapa'],
-  [ShieldCheck, 'Status kartu kamu — aktif atau nggak — jelas, nggak ada yang disembunyiin'],
+  [Sparkle, 'Saldo poin kelihatan paling depan'],
+  [Receipt, 'Poin masuk dan poin tertukar, tercatat rapi'],
+  [ListMagnifyingGlass, 'Ketuk transaksi buat lihat detailnya'],
 ];
 
 const accessFeatures: Feature[] = [
-  [DeviceMobile, 'Masuk pakai nomor HP atau nomor kartu — udah gitu aja'],
-  [Moon, 'Mode gelap otomatis nyala kalau HP kamu lagi mode gelap'],
-  [DownloadSimple, 'Bisa dipasang di layar utama HP, iPhone maupun Android'],
-  [LockKey, 'Data kamu aman, cuma kamu yang bisa lihat'],
+  [DeviceMobile, 'Cukup nomor HP atau nomor kartu'],
+  [LockKey, 'Tanpa password, tanpa daftar ulang'],
+  [ShieldCheck, 'Data kamu privat, cuma kamu yang lihat'],
 ];
 
-const HEADLINE_LEAD = 'Kartu Member & Poin Kamu,';
+/* What membership is actually worth, concrete first. "Tahu duluan" is the fourth
+   perk but it lives in the paragraph instead: it is the reason to tap the
+   WhatsApp button, so it belongs next to it rather than in this list. */
+const memberPerks: Feature[] = [
+  [Percent, 'Diskon 10% untuk layanan di Prodia'],
+  [Ticket, 'Poin kamu bisa ditukar jadi voucher'],
+  [Gift, 'Promo spesial khusus member'],
+];
+
+/* The no-break space is load-bearing: `text-wrap: balance` otherwise splits this
+   as "Kartu Member" / "& Poin Kamu," because that rag is a hair more even, which
+   leaves the ampersand orphaned at the head of a line. Gluing it to "Member"
+   forces the break after it, where a conjunction belongs. Written as an escape
+   so a formatter cannot silently turn it back into a plain space. */
+const HEADLINE_LEAD = 'Kartu Member\u00A0& Poin Kamu,';
 /* First phrase is the one in copywritingseo.md; it is what screen readers get
    and what renders before the rotation starts. */
 const HEADLINE_PHRASES = ['Sekarang di HP', 'Selalu Kebawa', 'Gampang Dicek', 'Siap Dipakai'];
@@ -226,7 +237,6 @@ export function Landing({ demo: isDemo, notice, sample }: { demo: boolean; notic
 
         <section className="landing-hero">
           <div className="landing-hero-copy">
-            <span className="landing-eyebrow"><Sparkle size={13} weight="fill" />Beauty Member · Kendari</span>
             <Headline />
             <p className="landing-lead">Nggak perlu bawa kartu fisik lagi. Buka HP, tunjukkan ke kasir, selesai.</p>
             <div className="landing-cta">
@@ -246,7 +256,7 @@ export function Landing({ demo: isDemo, notice, sample }: { demo: boolean; notic
           <div className="landing-head">
             <span className="landing-kicker">Kartu member digital</span>
             <h2 id="kartu-title">Kartu Member Kamu, Selalu Ada di HP</h2>
-            <p>Lupa bawa kartu? Kartunya ketinggalan di rumah? Sekarang nggak masalah. Kartu member kamu ada di HP — tinggal buka, tunjukkan barcode-nya ke kasir, langsung kepakai.</p>
+            <p>Lupa bawa kartu fisik? Buka HP, tunjukkan barcode ke kasir — selesai.</p>
           </div>
           <FeatureList items={cardFeatures} />
         </section>
@@ -256,7 +266,7 @@ export function Landing({ demo: isDemo, notice, sample }: { demo: boolean; notic
             <div className="landing-head">
               <span className="landing-kicker">Saldo &amp; riwayat poin</span>
               <h2 id="poin-title">Cek Poin Kapan Aja, Nggak Perlu Nanya Kasir</h2>
-              <p>Tiap kali belanja, poin kamu nambah otomatis. Mau tahu udah ngumpul berapa? Tinggal buka, langsung kelihatan.</p>
+              <p>Tiap belanja, poin nambah otomatis. Buka aplikasi, saldonya langsung kelihatan.</p>
             </div>
             <FeatureList items={pointFeatures} />
           </div>
@@ -318,9 +328,17 @@ export function Landing({ demo: isDemo, notice, sample }: { demo: boolean; notic
         <section className="landing-community" aria-labelledby="komunitas-title">
           <Image src="/beauty-still-life.webp" alt="Koleksi skincare dan kosmetik Beauty Kendari" fill sizes="100vw" />
           <div className="landing-community-copy">
-            <span className="landing-kicker landing-kicker-light">Komunitas member</span>
-            <h2 id="komunitas-title">Gabung Grup Member, Biar Nggak Ketinggalan Promo</h2>
-            <p>Ada produk baru datang? Lagi ada promo? Info-nya duluan masuk ke grup WhatsApp member. Gabung aja, gratis.</p>
+            <span className="landing-kicker landing-kicker-light">Benefit member</span>
+            <h2 id="komunitas-title">Enaknya Jadi Member Beauty</h2>
+            <ul className="landing-perks">
+              {memberPerks.map(([Icon, text]) => (
+                <li key={text}>
+                  <span className="landing-perk-icon"><Icon size={18} weight="fill" /></span>
+                  {text}
+                </li>
+              ))}
+            </ul>
+            <p>Info promo dan event selalu masuk duluan ke grup WhatsApp member. Gabung aja, gratis.</p>
             <a className="button primary" href={COMMUNITY_URL} target="_blank" rel="noreferrer">
               <WhatsappLogo size={19} weight="fill" />Gabung Grup Member
             </a>
@@ -332,14 +350,13 @@ export function Landing({ demo: isDemo, notice, sample }: { demo: boolean; notic
             <div className="landing-head">
               <span className="landing-kicker">Kemudahan akses</span>
               <h2 id="masuk-title">Masuk Cukup Pakai Nomor HP</h2>
-              <p>Nggak usah bikin akun baru. Nggak usah ngapalin password. Masukin nomor HP atau nomor kartu yang udah terdaftar, langsung masuk.</p>
+              <p>Akunmu sudah dibuat waktu daftar di kasir. Tinggal masuk.</p>
             </div>
             <FeatureList items={accessFeatures} />
           </div>
           <div className="landing-panel landing-login-cta">
             <span className="circle-icon"><LockKey size={24} /></span>
             <h3>Masuk ke akun membermu</h3>
-            <p>Masukin nomor HP atau nomor kartu yang udah terdaftar. Nggak perlu password, nggak perlu daftar ulang.</p>
             <button type="button" className="button primary full" data-login-open>Masuk sekarang <ArrowRight size={18} /></button>
             <span className="login-assurance"><ShieldCheck size={15} />Masuk praktis, tanpa password.</span>
             <p className="registration-note">Belum menjadi member?<span>Daftar langsung di kasir outlet Beauty Kendari.</span></p>

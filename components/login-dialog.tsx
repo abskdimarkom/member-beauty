@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState, type FormEvent, type MouseEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, Copy, Info, ShieldCheck, WarningCircle, X } from '@phosphor-icons/react';
+import { ArrowRight, ArrowUpRight, Copy, Info, ShieldCheck, WarningCircle, WhatsappLogo, X } from '@phosphor-icons/react';
+import { HELP_WHATSAPP_DISPLAY, HELP_WHATSAPP_URL } from '@/lib/terms';
 import type { Member } from '@/lib/types';
 
 /**
@@ -87,6 +88,11 @@ export function LoginDialog({ demo, sample }: { demo: boolean; sample?: Member }
         <span className="login-assurance"><ShieldCheck size={15} />Masuk praktis, tanpa password.</span>
         {demo && sample && <div className="demo-login"><Info size={19} /><div><strong>Pratinjau frontend</strong><p>Belum terhubung ke data member asli.</p><button type="button" className="text-link" onClick={() => { setInput(sample.phone); setError(''); }}>Gunakan nomor demo <Copy size={14} /></button></div></div>}
         <p className="registration-note">Belum menjadi member?<span>Daftar langsung di kasir outlet Beauty Kendari.</span></p>
+        <a className="login-help" href={HELP_WHATSAPP_URL} target="_blank" rel="noreferrer">
+          <span className="login-help-icon"><WhatsappLogo size={18} weight="fill" /></span>
+          <span><strong>Nomormu nggak dikenali?</strong><small>Chat admin di {HELP_WHATSAPP_DISPLAY}</small></span>
+          <ArrowUpRight size={16} />
+        </a>
       </div>
     </dialog>
   );
