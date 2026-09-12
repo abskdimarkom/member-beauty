@@ -52,22 +52,26 @@ export async function loadMemberData(search?: Search): Promise<PageData> {
   const kode = await readSession((await cookies()).get(SESSION_COOKIE)?.value);
   if (!kode) redirect(loginUrl(search));
 
-  let member: Member;
-  try {
-    member = await getMember(kode);
-  } catch (error) {
+  // The card and history are independent Affari calls; firing them together
+  // halves the round-trip latency that gates this page's first paint. History
+  // stays optional — its rejection degrades one panel, not the whole page.
+  const [memberResult, historyResult] = await Promise.allSettled([getMember(kode), getHistory(kode)]);
+
+  if (memberResult.status === 'rejected') {
+    const error = memberResult.reason;
     // A session pointing at a member Affari no longer returns is a dead session.
     if (error instanceof AffariError && error.kind === 'not-found') redirect(loginUrl(search));
     throw error;
   }
+  const member = memberResult.value;
 
   let transactions: Transaction[] = [];
   let historyFailed = false;
-  try {
-    transactions = await getHistory(kode);
-  } catch (error) {
+  if (historyResult.status === 'fulfilled') {
+    transactions = historyResult.value;
+  } else {
     historyFailed = true;
-    console.error('[affari] history failed for', kode, error);
+    console.error('[affari] history failed for', kode, historyResult.reason);
   }
 
   return { member, transactions, demo: false, historyFailed };
