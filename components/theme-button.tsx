@@ -3,12 +3,11 @@
 import { useEffect, useState } from 'react';
 import { Moon, Sun } from '@phosphor-icons/react';
 
-/** Light/dark toggle. Follows the device until the visitor picks a side. */
+/** Light/dark toggle. Defaults to light; dark only when the visitor picks it. */
 export function ThemeButton() {
   const [dark, setDark] = useState(false);
   useEffect(() => {
-    const value = localStorage.getItem('beauty-theme');
-    const next = value ? value === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const next = localStorage.getItem('beauty-theme') === 'dark';
     setDark(next);
     document.documentElement.dataset.theme = next ? 'dark' : 'light';
   }, []);
