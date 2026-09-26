@@ -9,6 +9,20 @@
         "dev"
       ],
       "port": 3000
+    },
+    {
+      "name": "member-beauty-demo",
+      "runtimeExecutable": "env",
+      "runtimeArgs": [
+        "AFFARI_TOKEN=",
+        "NEXT_DIST_DIR=.next-demo",
+        "npx",
+        "next",
+        "dev",
+        "-p",
+        "3100"
+      ],
+      "port": 3100
     }
   ]
 }

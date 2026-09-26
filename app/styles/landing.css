@@ -1,0 +1,768 @@
+/* ==========================================================================
+   Landing — the public /login page: marketing sections above the sign-in card
+   ========================================================================== */
+
+.landing {
+  --landing-gutter: clamp(20px, 5vw, 40px);
+  --landing-max: 1240px;
+  --section-space: clamp(44px, 7vw, 88px);
+  --header-height: 70px;
+  --phone-width: min(300px, 84vw);
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  background:
+    radial-gradient(900px 520px at 92% -8%, var(--veil-strong), transparent 62%),
+    radial-gradient(700px 420px at -10% 24%, rgba(254, 62, 159, 0.05), transparent 66%),
+    var(--ground);
+}
+
+.landing main { display: flex; flex-direction: column; }
+
+/* Anything the in-page anchors jump to has to clear the sticky header. */
+.landing [id] { scroll-margin-top: calc(var(--header-height) + 16px); }
+
+/* One reading column, shared by every band that is not full-bleed. */
+.landing-notice,
+.landing-hero,
+.landing-section,
+.landing-community-copy,
+.landing-header-inner {
+  width: min(100%, var(--landing-max));
+  margin-inline: auto;
+  padding-inline: var(--landing-gutter);
+}
+
+/* ------------------------------------------------------------ header */
+
+.landing-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: var(--ground);
+  border-bottom: 1px solid var(--line-soft);
+}
+
+@supports (backdrop-filter: blur(4px)) {
+  .landing-header {
+    background: color-mix(in srgb, var(--ground) 58%, transparent);
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+  }
+}
+
+.landing-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding-block: 11px;
+}
+
+.landing-header-actions { display: flex; align-items: center; gap: 10px; }
+.landing-demo-link { font-size: var(--text-2xs); }
+
+/* ------------------------------------------------------------ notice */
+
+.landing-notice {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin-top: 18px;
+  padding: 13px 16px;
+  border: 1px solid var(--line-pink);
+  border-radius: var(--r-lg);
+  background: var(--veil);
+  color: var(--ink-soft);
+  font-size: var(--text-xs);
+  line-height: 1.6;
+}
+
+.landing-notice > svg { flex: none; color: var(--pink-deep); }
+.landing-notice p { flex: 1; min-width: 14ch; }
+.landing-notice .text-link { font-size: var(--text-xs); }
+
+/* -------------------------------------------------------------- hero */
+
+.landing-hero {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(30px, 7vw, 44px);
+  padding-block: clamp(24px, 4vw, 44px) var(--section-space);
+}
+
+.landing-headline {
+  max-width: 24ch;
+  margin-top: 20px;
+  font-family: var(--font-serif);
+  font-size: var(--text-5xl);
+  font-weight: 400;
+  line-height: 1.14;
+  letter-spacing: var(--tracking-display);
+}
+
+.landing-headline-lead { display: block; }
+
+/* One line box tall, so the phrases slide through it like a slot. 1.14 clears
+   the serif's descenders, so nothing is shaved off "Sekarang" or "Gampang". */
+.landing-rotator {
+  display: block;
+  overflow: hidden;
+  height: 1.14em;
+  animation: landing-fade-up 0.5s var(--ease) 0.2s backwards;
+}
+
+.landing-rotator-track {
+  display: flex;
+  flex-direction: column;
+  /* Five items: the four phrases plus a repeat of the first, so the loop back
+     to the top lands on identical text and never blinks. */
+  animation: landing-rotate 14s var(--ease) 1.4s infinite;
+}
+
+.landing-rotator-track > span {
+  flex: none;
+  height: 1.14em;
+  color: var(--pink-deep);
+}
+
+@supports ((background-clip: text) or (-webkit-background-clip: text)) {
+  .landing-rotator-track > span {
+    background-image: linear-gradient(96deg, var(--pink), var(--pink-deep) 55%, var(--pink-ink));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
+@keyframes landing-rotate {
+  0%, 17% { transform: translate3d(0, 0, 0); }
+  21%, 38% { transform: translate3d(0, -20%, 0); }
+  42%, 59% { transform: translate3d(0, -40%, 0); }
+  63%, 80% { transform: translate3d(0, -60%, 0); }
+  84%, 100% { transform: translate3d(0, -80%, 0); }
+}
+
+/* The opener arrives a word at a time, then the rest of the column follows on
+   one beat. Delays are short on purpose: the H1 is the LCP element. */
+.landing-word {
+  display: inline-block;
+  animation: landing-word-in 0.45s var(--ease) backwards;
+  animation-delay: calc(var(--word-index) * 50ms);
+}
+
+@keyframes landing-word-in {
+  from { opacity: 0; transform: translate3d(0, 0.42em, 0); }
+}
+
+.landing-hero-copy > .landing-lead { animation: landing-fade-up 0.5s var(--ease) 0.26s backwards; }
+.landing-hero-copy > .landing-cta { animation: landing-fade-up 0.5s var(--ease) 0.34s backwards; }
+.landing-hero-copy > .landing-trust { animation: landing-fade-up 0.5s var(--ease) 0.42s backwards; }
+
+@keyframes landing-fade-up {
+  from { opacity: 0; transform: translate3d(0, 12px, 0); }
+}
+
+/* The global reduce block only shortens durations; the delays would still hide
+   the words and the rotation would still cycle, so switch them off outright. */
+@media (prefers-reduced-motion: reduce) {
+  .landing-word,
+  .landing-rotator,
+  .landing-rotator-track,
+  .landing-hero-copy > .landing-lead,
+  .landing-hero-copy > .landing-cta,
+  .landing-hero-copy > .landing-trust { animation: none; }
+}
+
+
+.landing-lead {
+  max-width: 44ch;
+  margin-top: 18px;
+  color: var(--muted);
+  font-size: clamp(var(--text-base), 0.85rem + 0.6vw, 1.125rem);
+  line-height: 1.65;
+}
+
+.landing-cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+
+.landing-trust {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 11px 24px;
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 28px;
+  padding: 22px 0 0;
+  border-top: 1px solid var(--line-soft);
+  list-style: none;
+}
+
+.landing-trust li { display: inline-flex; align-items: center; gap: 8px; color: var(--ink-soft); font-size: var(--text-xs); font-weight: 600; }
+.landing-trust svg { flex: none; color: var(--pink-deep); }
+
+/* --------------------------------------------- hero device showcase */
+
+.showcase {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  isolation: isolate;
+}
+
+.showcase-glow {
+  position: absolute;
+  inset: -3% -6% 4%;
+  z-index: -1;
+  background: radial-gradient(52% 42% at 50% 46%, var(--veil-strong), transparent 72%);
+}
+
+/* Real handset proportions. A squat frame reads as a toy, not a phone. */
+.showcase-phone {
+  position: relative;
+  width: var(--phone-width);
+  aspect-ratio: 1 / 2.14;
+  border-radius: calc(var(--phone-width) * 0.158);
+  background: linear-gradient(155deg, #43434e, #101014 34%, #0b0b0e 68%, #35353f);
+  box-shadow: var(--shadow-lg), inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+}
+
+.showcase-key {
+  position: absolute;
+  width: 2.5px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #4c4c58, #17171d);
+}
+
+.showcase-key-silent { left: -2px; top: 14.5%; height: 3.2%; }
+.showcase-key-up { left: -2px; top: 21%; height: 7.2%; }
+.showcase-key-down { left: -2px; top: 30%; height: 7.2%; }
+.showcase-key-power { right: -2px; top: 24%; height: 10.5%; }
+
+.showcase-screen {
+  position: absolute;
+  inset: calc(var(--phone-width) * 0.036);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: calc(var(--phone-width) * 0.125);
+  background: var(--ground);
+}
+
+.showcase-island {
+  position: absolute;
+  top: 2.1%;
+  left: 50%;
+  z-index: 3;
+  width: 29%;
+  height: 4.1%;
+  transform: translateX(-50%);
+  border-radius: var(--r-pill);
+  background: #07070a;
+}
+
+.showcase-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex: none;
+  padding: 42px 12px 9px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.showcase-bar .brand-symbol { width: 23px; }
+.showcase-bar .brand-type { font-size: 10.5px; }
+.showcase-bar .brand-type span { font-size: 5.5px; letter-spacing: 0.26em; margin-top: 2px; }
+.showcase-bar-actions { display: flex; align-items: center; gap: 7px; color: var(--muted); }
+.showcase-bar-divider { width: 1px; height: 14px; background: var(--line); }
+
+.showcase-avatar {
+  display: grid;
+  place-items: center;
+  width: 23px;
+  height: 23px;
+  flex: none;
+  border-radius: var(--r-pill);
+  background: linear-gradient(140deg, var(--pink-bright), var(--pink-deep));
+  color: #fff;
+  font-size: 8px;
+  font-weight: 800;
+}
+
+/* Clips at the bottom like a real screen when the frame runs short. */
+.showcase-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  padding: 12px 12px 10px;
+}
+
+.showcase-greeting-kicker { display: block; color: var(--pink-deep); font-size: 6.5px; font-weight: 800; letter-spacing: 0.19em; }
+.showcase-greeting strong { display: block; margin-top: 5px; font-family: var(--font-serif); font-size: 19px; font-weight: 400; line-height: 1.1; letter-spacing: var(--tracking-display); }
+.showcase-greeting strong em { color: var(--pink-deep); }
+.showcase-greeting p { margin-top: 3px; color: var(--muted); font-size: 8px; line-height: 1.5; }
+
+/* The real membership card, scaled to the mock screen. */
+.showcase-card {
+  gap: 9px;
+  min-height: 0;
+  padding: 12px 12px 8px;
+  border-radius: 16px;
+  box-shadow: 0 12px 22px -12px rgba(168, 17, 92, 0.55);
+}
+
+.showcase-card .heart-one { width: 98px; height: 98px; right: -26px; top: -22px; }
+.showcase-card .heart-two { display: none; }
+.showcase-card .brand-symbol { width: 19px; }
+.showcase-card .brand-type { font-size: 8.5px; }
+.showcase-card .brand-type span { font-size: 5px; letter-spacing: 0.24em; margin-top: 1px; }
+.showcase-card .gold-label { padding: 3px 6px; gap: 3px; font-size: 6.5px; letter-spacing: 0.08em; }
+.showcase-card .card-bottom { gap: 7px; }
+.showcase-card .card-label { font-size: 6px; letter-spacing: 0.14em; }
+.showcase-card .card-name { display: block; margin: 4px 0 5px; font-size: 13px; font-weight: 700; letter-spacing: -0.03em; }
+.showcase-card .card-number { min-height: 0; padding: 3px 6px; gap: 4px; border-radius: 7px; font-size: 9px; letter-spacing: 0.05em; }
+.showcase-card .card-qr { padding: 4px 4px 3px; gap: 2px; border-radius: 8px; box-shadow: 0 4px 10px -5px rgba(90, 6, 46, 0.5); }
+.showcase-card .card-qr span { gap: 2px; font-size: 5.5px; }
+.showcase-card .card-footer { padding-top: 6px; font-size: 6.5px; }
+.showcase-card .card-footer span:last-child { font-size: 6px; letter-spacing: 0.12em; }
+
+.showcase-card-note { color: var(--muted); font-size: 7px; line-height: 1.5; }
+
+.showcase-validity { display: flex; align-items: center; gap: 5px; color: var(--ink-soft); font-size: 8px; font-weight: 600; }
+.showcase-validity svg { flex: none; color: var(--pink-deep); }
+.showcase-validity strong { font-weight: 800; }
+
+.showcase-points {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 12px;
+  border-radius: 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+.showcase-points-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.showcase-points-label { display: inline-flex; align-items: center; gap: 5px; color: var(--ink-soft); font-size: 9px; font-weight: 700; }
+.showcase-points-label svg { flex: none; color: var(--pink); }
+
+.showcase-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex: none;
+  padding: 2px 7px;
+  border-radius: var(--r-pill);
+  background: var(--positive-bg);
+  color: var(--positive);
+  font-size: 7.5px;
+  font-weight: 700;
+}
+
+.showcase-points-value { font-size: 27px; font-weight: 700; line-height: 1; letter-spacing: -0.035em; font-variant-numeric: tabular-nums; }
+.showcase-points-value span { margin-left: 5px; font-size: 9.5px; font-weight: 700; letter-spacing: -0.01em; color: var(--muted); }
+.showcase-points-rule { height: 1px; background: var(--line-soft); }
+.showcase-points-note { display: flex; align-items: center; gap: 8px; }
+.showcase-points-note svg { flex: none; color: var(--pink-deep); }
+.showcase-points-note > span { display: block; color: var(--muted); font-size: 7.5px; line-height: 1.5; }
+.showcase-points-note strong { display: block; color: var(--ink); font-size: 8.5px; }
+.showcase-points-link { display: inline-flex; align-items: center; gap: 5px; color: var(--pink-deep); font-size: 8.5px; font-weight: 700; }
+
+.showcase-activity { display: flex; flex-direction: column; gap: 5px; }
+.showcase-activity-head { color: var(--ink-soft); font-size: 8.5px; font-weight: 700; }
+
+.showcase-activity-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 9px;
+  border-radius: 11px;
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+}
+
+.showcase-activity-icon {
+  display: grid;
+  place-items: center;
+  width: 21px;
+  height: 21px;
+  flex: none;
+  border-radius: var(--r-pill);
+  background: var(--veil);
+  color: var(--pink-deep);
+}
+
+.showcase-activity-copy { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.showcase-activity-copy strong { overflow: hidden; font-size: 8.5px; white-space: nowrap; text-overflow: ellipsis; }
+.showcase-activity-copy small { color: var(--muted); font-size: 7px; }
+
+.showcase-activity-row + .showcase-activity-row { display: none; }
+
+.showcase-nav {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  flex: none;
+  padding: 7px 6px 11px;
+  background: var(--surface);
+  border-top: 1px solid var(--line-soft);
+}
+
+.showcase-nav > span { display: flex; flex-direction: column; align-items: center; gap: 3px; color: var(--muted); font-size: 7px; font-weight: 700; }
+.showcase-nav-active { color: var(--pink-deep); }
+
+.showcase-in, .showcase-out { flex: none; font-weight: 800; font-size: 10px; font-variant-numeric: tabular-nums; }
+.showcase-in { color: var(--positive); }
+.showcase-out { color: var(--pink-deep); }
+
+.showcase-badge {
+  position: absolute;
+  z-index: 2;
+  display: none;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 13px;
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-md);
+  color: var(--ink);
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.showcase-badge svg { flex: none; color: var(--pink); }
+
+/* Parked just outside opposite corners of the device: they read as floating
+   chips without covering the card, the balance or a transaction amount. The
+   right-hand offset stays inside the section gutter so nothing overflows. */
+.showcase-badge-one { top: 4%; left: -16%; }
+.showcase-badge-two { bottom: 5%; right: -12%; }
+.showcase-note { margin-top: 16px; max-width: 32ch; color: var(--muted); font-size: var(--text-3xs); text-align: center; text-wrap: balance; }
+
+/* ---------------------------------------------------------- sections */
+
+.landing-section { padding-block: var(--section-space); }
+.landing main > section + .landing-section { border-top: 1px solid var(--line-soft); }
+/* A change of surface already reads as a boundary, so drop the hairline next to
+   the photo band and either edge of a tinted band. */
+.landing main > .landing-community + .landing-section,
+.landing main > .landing-tinted + .landing-section,
+.landing main > section + .landing-tinted { border-top: 0; }
+
+.landing-tinted { background: var(--surface-2); }
+
+.landing-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  color: var(--pink-deep);
+  font-size: var(--text-3xs);
+  font-weight: 700;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+}
+
+/* Editorial rule in front of every kicker, so the sections share one mark. */
+.landing-kicker::before {
+  content: '';
+  width: 22px;
+  height: 1px;
+  flex: none;
+  background: currentColor;
+  opacity: 0.55;
+}
+
+.landing-kicker-light { color: var(--pink-100); }
+
+.landing-head h2 {
+  max-width: 20ch;
+  font-family: var(--font-serif);
+  font-size: var(--text-4xl);
+  font-weight: 400;
+  line-height: 1.08;
+  letter-spacing: var(--tracking-display);
+}
+
+.landing-head > p {
+  max-width: 54ch;
+  margin-top: 16px;
+  color: var(--muted);
+  font-size: clamp(var(--text-base), 0.85rem + 0.4vw, 1.0625rem);
+  line-height: 1.75;
+}
+
+.landing-features { display: grid; gap: 13px; margin-top: 30px; padding: 0; list-style: none; }
+
+.landing-features li {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  padding: 16px 17px;
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-xs);
+  color: var(--ink-soft);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  transition: transform var(--dur) var(--ease), border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+}
+
+.landing-features li:hover { transform: translateY(-2px); border-color: var(--line-pink); box-shadow: var(--shadow-sm); }
+
+.landing-feature-icon {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  flex: none;
+  border-radius: var(--r-md);
+  background: linear-gradient(150deg, var(--veil-strong), var(--veil));
+  border: 1px solid var(--line-pink);
+  color: var(--pink-deep);
+}
+
+.landing-split { display: grid; gap: clamp(28px, 5vw, 40px); }
+
+.landing-panel {
+  padding: 22px 20px;
+  border-radius: var(--r-xl);
+  background:
+    radial-gradient(120% 90% at 100% 0%, var(--veil), transparent 62%),
+    var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-md);
+}
+
+.landing-history-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: var(--text-xs); font-weight: 700; }
+.landing-history ul { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; padding: 0; list-style: none; }
+
+.landing-history li {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 12px 13px;
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  border: 1px solid var(--line-soft);
+}
+
+.landing-history-icon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border-radius: var(--r-pill);
+  background: var(--veil);
+  color: var(--pink-deep);
+}
+
+.landing-history-copy { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.landing-history-copy strong { font-size: var(--text-xs); }
+.landing-history-copy small { color: var(--muted); font-size: var(--text-3xs); }
+.landing-history .showcase-in, .landing-history .showcase-out { font-size: 13.5px; }
+.landing-history-note { margin-top: 14px; color: var(--muted); font-size: var(--text-3xs); text-align: center; }
+
+.landing-steps { display: flex; flex-direction: column; gap: 13px; margin-top: 28px; padding: 0; list-style: none; }
+.landing-steps li { display: flex; align-items: center; gap: 13px; color: var(--ink-soft); font-size: var(--text-sm); font-weight: 600; line-height: 1.55; }
+
+.landing-step-number {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border-radius: var(--r-pill);
+  background: var(--primary-gradient);
+  color: var(--on-primary);
+  font-size: var(--text-xs);
+  font-weight: 800;
+}
+
+.landing-login-cta > .icon-chip { margin-bottom: 16px; }
+.landing-login-cta h3 { font-family: var(--font-serif); font-size: clamp(1.625rem, 1.3rem + 1.2vw, 2rem); font-weight: 400; line-height: 1.1; letter-spacing: var(--tracking-display); }
+.landing-login-cta > p { margin-top: 12px; color: var(--muted); font-size: var(--text-sm); line-height: 1.7; }
+.landing-login-cta .button { justify-content: space-between; min-height: 54px; margin-top: 22px; }
+
+.landing-redemption > .icon-chip { margin-bottom: 14px; }
+.landing-redemption h3 { font-size: var(--text-lg); }
+.landing-redemption .redemption-table { margin-top: 18px; }
+
+/* --------------------------------------------------------- community */
+
+.landing-community {
+  position: relative;
+  display: flex;
+  align-items: center;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: 340px;
+  color: #fff;
+  background: var(--pink-900);
+}
+
+.landing-community > img { object-fit: cover; object-position: 64% 50%; z-index: -2; }
+
+.landing-community::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, rgba(58, 17, 36, 0.42), var(--photo-scrim));
+}
+
+.landing-community-copy { padding-block: clamp(44px, 8vw, 76px); }
+
+.landing-community-copy h2 {
+  max-width: 18ch;
+  font-family: var(--font-serif);
+  font-size: var(--text-4xl);
+  font-weight: 400;
+  line-height: 1.08;
+  letter-spacing: var(--tracking-display);
+}
+
+.landing-community-copy p { max-width: 46ch; margin-top: 16px; color: rgba(255, 255, 255, 0.85); font-size: clamp(var(--text-base), 0.85rem + 0.4vw, 1.0625rem); line-height: 1.7; }
+.landing-community-copy .button { margin-top: 26px; }
+
+/* These sit straight on the photograph, so each perk carries its own translucent
+   pane — bare white text survives the dark left third and falls apart over the
+   bottles. The width cap is the same story: on desktop the overlay fades to 0.28
+   on the right, so the list has to stay inside the dark side of the gradient. */
+.landing-perks {
+  display: grid;
+  gap: 10px;
+  max-width: 44ch;
+  margin-top: 22px;
+  padding: 0;
+  list-style: none;
+}
+
+.landing-perks li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 15px;
+  border-radius: var(--r-lg);
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.landing-perk-icon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border-radius: var(--r-sm);
+  background: #fff;
+  color: var(--pink-deep);
+}
+
+/* --------------------------------------------------------- faq + foot */
+
+.landing-faq-section .faq-section { border-radius: var(--r-xl); }
+.landing-faq-section .faq-section summary { min-height: 60px; font-size: var(--text-base); }
+.landing-faq-section .faq-section details p { font-size: var(--text-sm); }
+
+.landing-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: auto;
+  padding: 40px var(--landing-gutter) calc(36px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line-soft);
+  text-align: center;
+}
+
+.landing-footer p { max-width: 44ch; color: var(--muted); font-size: var(--text-xs); line-height: 1.7; }
+.landing-footer > span { color: var(--faint); font-size: var(--text-3xs); letter-spacing: 0.04em; }
+
+/* -------------------------------------------------------- breakpoints */
+
+@media (max-width: 479px) {
+  .landing-demo-link { display: none; }
+  .landing-cta .button { width: 100%; }
+}
+
+@media (min-width: 600px) {
+  .landing-features { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .landing-split .landing-features { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (min-width: 900px) {
+  .landing { --phone-width: 304px; }
+  .landing-section.landing-faq-section { grid-template-columns: minmax(0, 0.72fr) minmax(0, 1.28fr); }
+  .landing-faq-section .landing-head { position: sticky; top: 100px; }
+  .landing-hero {
+    flex-direction: row;
+    align-items: center;
+    gap: clamp(32px, 5vw, 68px);
+    min-height: min(calc(100vh - var(--header-height)), 720px);
+    min-height: min(calc(100svh - var(--header-height)), 720px);
+  }
+  .landing-hero-copy { flex: 1 1 55%; }
+  .showcase { flex: 0 0 auto; }
+  .showcase-badge { display: inline-flex; }
+  .showcase-note { margin-top: 30px; }
+  .landing-split { grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); align-items: start; }
+  .landing-panel { padding: 26px 24px; }
+  .landing-login-cta { padding: 30px 28px 26px; }
+  .landing-tinted { border-radius: var(--r-2xl); }
+  .landing-community { width: min(100%, var(--landing-max)); margin-inline: auto; min-height: 380px; border-radius: var(--r-2xl); }
+  .landing-community::before { background: linear-gradient(100deg, var(--photo-scrim) 34%, var(--photo-scrim-soft)); }
+  .landing-faq-section .faq-section { padding: 26px 28px; }
+}
+
+@media (min-width: 1100px) {
+  /* Four cards fit one clean row. At this width a tile beats a row: standing the
+     icon above the copy lets the text use the full card instead of leaving a
+     column of dead space beside it, and the grid keeps every tile the same
+     height however many lines the copy runs to. */
+  .landing-section:not(.landing-split) .landing-features { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+  .landing-section:not(.landing-split) .landing-features li {
+    flex-direction: column;
+    gap: 15px;
+    padding: 22px 20px 24px;
+  }
+
+  .landing-section:not(.landing-split) .landing-feature-icon { width: 44px; height: 44px; }
+
+  /* Stacked, the three perks left three-fifths of the photograph empty and pushed
+     the band past 640px — most of a laptop screen. One row of tiles spends that
+     height on width instead, so the copy reaches across the dark half of the
+     gradient rather than hugging the left edge. */
+  .landing-perks {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    max-width: 760px;
+    gap: 12px;
+  }
+
+  .landing-perks li {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px 16px 18px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .landing { --landing-max: 1320px; --phone-width: 316px; }
+  .showcase-activity-row + .showcase-activity-row { display: flex; }
+}

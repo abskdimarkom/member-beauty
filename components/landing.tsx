@@ -108,7 +108,7 @@ function PhoneShowcase({ member }: { member: Member }) {
           <div className="showcase-body">
             <div className="showcase-greeting">
               <span className="showcase-greeting-kicker">RUANG MEMBER</span>
-              <strong>Halo, {member.firstName}!</strong>
+              <strong>Halo, <em>{member.firstName}</em></strong>
               <p>Kartu member dan poin, selalu dekat denganmu.</p>
             </div>
 
@@ -120,7 +120,7 @@ function PhoneShowcase({ member }: { member: Member }) {
               </div>
               <div className="card-bottom">
                 <div>
-                  <span className="card-label">YOUR BEAUTY MEMBERSHIP</span>
+                  <span className="card-label">Nama member</span>
                   <span className="card-name">{member.name}</span>
                   <span className="card-number">{member.card}<Copy size={9} /></span>
                 </div>
@@ -240,8 +240,8 @@ export function Landing({ demo: isDemo, notice, sample }: { demo: boolean; notic
             <Headline />
             <p className="landing-lead">Nggak perlu bawa kartu fisik lagi. Buka HP, tunjukkan ke kasir, selesai.</p>
             <div className="landing-cta">
-              <a className="button primary" href="#masuk" data-login-open>Masuk ke akun member <ArrowRight size={18} /></a>
-              <a className="button secondary" href="#kartu">Lihat cara kerjanya</a>
+              <a className="button primary large" href="#masuk" data-login-open>Masuk ke akun member <ArrowRight size={18} /></a>
+              <a className="button secondary large" href="#kartu">Lihat cara kerjanya</a>
             </div>
             <ul className="landing-trust">
               <li><Gift size={17} />100 poin = Rp10.000</li>
@@ -307,7 +307,7 @@ export function Landing({ demo: isDemo, notice, sample }: { demo: boolean; notic
             </ol>
           </div>
           <div className="landing-panel landing-redemption">
-            <span className="circle-icon"><Gift size={24} /></span>
+            <span className="icon-chip"><Gift size={24} /></span>
             <h3>Pilihan penukaran</h3>
             <table className="redemption-table">
               <caption className="sr-only">Jumlah poin yang ditukar dan nilai potongannya</caption>
@@ -339,7 +339,7 @@ export function Landing({ demo: isDemo, notice, sample }: { demo: boolean; notic
               ))}
             </ul>
             <p>Info promo dan event selalu masuk duluan ke grup WhatsApp member. Gabung aja, gratis.</p>
-            <a className="button primary" href={COMMUNITY_URL} target="_blank" rel="noreferrer">
+            <a className="button primary large" href={COMMUNITY_URL} target="_blank" rel="noreferrer">
               <WhatsappLogo size={19} weight="fill" />Gabung Grup Member
             </a>
           </div>
@@ -355,7 +355,7 @@ export function Landing({ demo: isDemo, notice, sample }: { demo: boolean; notic
             <FeatureList items={accessFeatures} />
           </div>
           <div className="landing-panel landing-login-cta">
-            <span className="circle-icon"><LockKey size={24} /></span>
+            <span className="icon-chip"><LockKey size={24} /></span>
             <h3>Masuk ke akun membermu</h3>
             <button type="button" className="button primary full" data-login-open>Masuk sekarang <ArrowRight size={18} /></button>
             <span className="login-assurance"><ShieldCheck size={15} />Masuk praktis, tanpa password.</span>

@@ -1,0 +1,214 @@
+/* ==========================================================================
+   Beauty Kendari — design tokens
+   The only place raw colours, sizes and timings live. Every other stylesheet
+   reads these variables; see DESIGN.md for when to reach for which one.
+
+   Brand: heart + "b", magenta #FE3E9F on white.
+   ========================================================================== */
+
+:root {
+  /* ------------------------------------------------------------ palette */
+  /* Pink ramp built around the brand swatch (500). 600+ carry white text at
+     AA contrast; 500 itself only reaches 3.3:1, so it is never a text fill. */
+  --pink-50: #fff4f9;
+  --pink-100: #ffe4f1;
+  --pink-200: #ffc4e1;
+  --pink-300: #ff97ca;
+  --pink-400: #ff6bb8;
+  --pink-500: #fe3e9f;
+  --pink-600: #dc1b7c;
+  --pink-700: #b8126a;
+  --pink-800: #8f0e53;
+  --pink-900: #5c0a36;
+
+  /* One grey family, tinted plum so neutrals sit with the pink instead of
+     fighting it. */
+  --plum-0: #ffffff;
+  --plum-25: #fcfafc;
+  --plum-50: #faf5f8;
+  --plum-100: #f5edf2;
+  --plum-200: #ebe1e7;
+  --plum-300: #b3a8b6;
+  --plum-500: #786d7b;
+  --plum-600: #6a5f6d;
+  --plum-700: #4c4351;
+  --plum-900: #29232c;
+  --plum-950: #1f1422;
+
+  /* ------------------------------------------------------ semantic colour */
+  --pink: var(--pink-500);            /* brand mark, icons, decoration */
+  --pink-bright: var(--pink-400);
+  --pink-deep: #a8115c;               /* accent text + links (7.2:1 on white) */
+  --pink-ink: #7d0b44;                /* accent text on tinted surfaces */
+
+  --ground: var(--plum-25);           /* page */
+  --surface: var(--plum-0);           /* cards, sheets */
+  --surface-2: var(--plum-50);        /* inset wells inside a card */
+  --surface-3: var(--plum-100);       /* segmented controls, hover */
+  --veil: rgba(254, 62, 159, 0.07);   /* pink tint for icon chips, active nav */
+  --veil-strong: rgba(254, 62, 159, 0.13);
+
+  --ink: var(--plum-900);             /* primary text */
+  --ink-soft: var(--plum-700);        /* body copy on cards */
+  --muted: var(--plum-600);           /* secondary text (5.8:1) */
+  --faint: var(--plum-500);           /* tertiary text, still AA (4.6:1) */
+  --icon-subtle: var(--plum-300);     /* chevrons and decoration only, never text */
+
+  --line: rgba(41, 35, 44, 0.1);
+  --line-soft: rgba(41, 35, 44, 0.06);
+  --line-pink: rgba(254, 62, 159, 0.22);
+
+  --on-primary: #ffffff;
+  --primary: var(--pink-600);
+  --primary-hover: var(--pink-700);
+  --primary-gradient: linear-gradient(150deg, #ec2a8d 0%, var(--pink-600) 48%, var(--pink-700) 100%);
+
+  --gold: #a86f10;
+  --gold-bg: rgba(214, 162, 62, 0.14);
+  --gold-foil: #ffdf9a;               /* crown on the pink card */
+  --positive: #1b7a4f;
+  --positive-bg: rgba(27, 122, 79, 0.1);
+  --danger: #b3252f;
+  --danger-bg: rgba(179, 37, 47, 0.08);
+  --whatsapp: #168a4b;
+  --whatsapp-bg: rgba(22, 138, 75, 0.1);
+
+  /* Membership card. Mirrored in the SVG export in member-card.tsx, so the
+     downloaded PNG matches the card on screen. */
+  --card-gradient:
+    radial-gradient(120% 90% at 88% 0%, rgba(255, 255, 255, 0.26), transparent 55%),
+    linear-gradient(150deg, #f8479f 0%, #dd1f7f 46%, #9e0f58 100%);
+
+  --scrim: rgba(38, 12, 28, 0.5);                 /* modal backdrop */
+  --photo-scrim: rgba(58, 17, 36, 0.9);           /* text over photography */
+  --photo-scrim-soft: rgba(58, 17, 36, 0.3);
+
+  /* ---------------------------------------------------------- elevation */
+  /* Shadows carry the plum hue; pure black reads grey on the pink ground. */
+  --shadow-xs: 0 1px 2px rgba(58, 22, 44, 0.06);
+  --shadow-sm: 0 1px 2px rgba(58, 22, 44, 0.04), 0 4px 12px -4px rgba(58, 22, 44, 0.08);
+  --shadow-md: 0 2px 6px rgba(58, 22, 44, 0.04), 0 14px 32px -14px rgba(78, 30, 58, 0.18);
+  --shadow-lg: 0 6px 18px rgba(58, 22, 44, 0.06), 0 30px 64px -28px rgba(78, 30, 58, 0.34);
+  --shadow-primary: 0 1px 0 rgba(255, 255, 255, 0.24) inset, 0 10px 22px -12px rgba(184, 18, 106, 0.8);
+  --shadow-card: 0 28px 50px -24px rgba(158, 15, 88, 0.6), 0 10px 20px -12px rgba(158, 15, 88, 0.35);
+
+  --focus-ring: 0 0 0 3px rgba(254, 62, 159, 0.28);
+
+  /* ---------------------------------------------------------- typography */
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-serif: var(--font-instrument), Georgia, 'Times New Roman', serif;
+
+  /* One scale. 11px is the floor for anything a member has to read. */
+  --text-3xs: 0.6875rem;  /* 11 — eyebrows, badges, fine print */
+  --text-2xs: 0.75rem;    /* 12 — captions, meta, timestamps */
+  --text-xs: 0.8125rem;   /* 13 — secondary copy */
+  --text-sm: 0.875rem;    /* 14 — UI labels, buttons, list titles */
+  --text-base: 0.9375rem; /* 15 — body */
+  --text-lg: 1.0625rem;   /* 17 — panel headings */
+  --text-xl: 1.25rem;     /* 20 — sheet titles */
+  --text-2xl: 1.5rem;     /* 24 */
+  --text-3xl: clamp(1.875rem, 1.5rem + 1.6vw, 2.5rem);   /* 30–40 page titles (serif) */
+  --text-4xl: clamp(2rem, 1.45rem + 2.6vw, 3rem);        /* 32–48 section titles (serif) */
+  --text-5xl: clamp(2.375rem, 1.5rem + 4.4vw, 4.25rem);  /* 38–68 landing headline (serif) */
+  --text-number: clamp(2.75rem, 2.2rem + 2.6vw, 3.5rem); /* point balance */
+
+  --leading-tight: 1.1;
+  --leading-snug: 1.3;
+  --leading-normal: 1.55;
+  --leading-relaxed: 1.7;
+
+  --tracking-display: -0.015em;  /* serif headlines */
+  --tracking-tight: -0.028em;    /* sans headings */
+  --tracking-caps: 0.14em;       /* uppercase eyebrows */
+
+  /* ------------------------------------------------------------- spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 40px;
+  --space-9: 56px;
+  --space-10: 72px;
+
+  /* ------------------------------------------------------------ geometry */
+  /* Nest concentrically: an inner radius is its container's minus the gap. */
+  --r-xs: 8px;
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 18px;
+  --r-xl: 24px;
+  --r-2xl: 32px;
+  --r-pill: 999px;
+
+  --tap: 44px;             /* minimum touch target */
+  --sidebar-w: 272px;
+  --shell-max: 1180px;
+
+  /* -------------------------------------------------------------- motion */
+  --ease: cubic-bezier(0.32, 0.72, 0, 1);         /* default: quick out, soft landing */
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1); /* small pops (badges, toggles) */
+  --dur-fast: 140ms;
+  --dur: 200ms;
+  --dur-slow: 320ms;
+
+  /* ------------------------------------------------------------- z-index */
+  --z-sticky: 30;
+  --z-sidebar: 35;
+  --z-nav: 40;
+  --z-dropdown: 45;
+  --z-overlay: 50;
+  --z-modal: 51;
+
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  --pink-deep: #ff7ab9;
+  --pink-ink: #ffa5cf;
+
+  --ground: #141017;
+  --surface: #1d1721;
+  --surface-2: #241d29;
+  --surface-3: #2c2432;
+  --veil: rgba(254, 62, 159, 0.11);
+  --veil-strong: rgba(254, 62, 159, 0.19);
+
+  --ink: #f7f0f4;
+  --ink-soft: #ddd2da;
+  --muted: #b0a4b2;
+  --faint: #978b9a;
+  --icon-subtle: #6d6270;
+
+  --line: rgba(255, 255, 255, 0.1);
+  --line-soft: rgba(255, 255, 255, 0.06);
+  --line-pink: rgba(254, 62, 159, 0.32);
+
+  --gold: #e8bd63;
+  --gold-bg: rgba(232, 189, 99, 0.14);
+  --positive: #62d3a0;
+  --positive-bg: rgba(98, 211, 160, 0.12);
+  --danger: #ff8f96;
+  --danger-bg: rgba(255, 143, 150, 0.12);
+  --whatsapp: #4fd18a;
+  --whatsapp-bg: rgba(79, 209, 138, 0.12);
+
+  --scrim: rgba(6, 3, 8, 0.66);
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 12px 30px -14px rgba(0, 0, 0, 0.7);
+  --shadow-lg: 0 30px 60px -28px rgba(0, 0, 0, 0.85);
+  --shadow-primary: 0 1px 0 rgba(255, 255, 255, 0.18) inset, 0 10px 24px -12px rgba(0, 0, 0, 0.8);
+  --shadow-card: 0 26px 50px -24px rgba(0, 0, 0, 0.8), 0 10px 22px -14px rgba(158, 15, 88, 0.5);
+
+  --focus-ring: 0 0 0 3px rgba(254, 62, 159, 0.4);
+
+  color-scheme: dark;
+}
+
+@media (min-width: 1280px) {
+  :root { --shell-max: 1240px; }
+}

@@ -1,12 +1,16 @@
 'use client';
 
 import { useId, useRef, useState } from 'react';
-import { DownloadSimple, Check, Copy, Heart, Crown, BarcodeIcon } from '@phosphor-icons/react';
+import { DownloadSimple, Check, Copy, Heart, Crown, BarcodeIcon, SunDim } from '@phosphor-icons/react';
 import { Code39 } from './code39';
 import { tierLabel } from '@/lib/format';
 import type { Member } from '@/lib/types';
 
-/** Original membership layout with a self-contained SVG for PNG export. */
+/**
+ * Membership card with a self-contained SVG for PNG export. The SVG repeats the
+ * `--card-gradient` stops from tokens.css by hand: an exported image cannot read
+ * CSS variables, and the download should match the card on screen.
+ */
 export function MemberCard({ member, demo, onOpen, onCopy, copied }: {
   member: Member; demo: boolean; onOpen?: () => void; onCopy: () => void; copied: boolean;
 }) {
@@ -54,7 +58,7 @@ export function MemberCard({ member, demo, onOpen, onCopy, copied }: {
   const nameSize = member.name.length > 24 ? 30 : 42;
   const artwork = <svg ref={ref} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 540" width="860" height="540">
     <defs>
-      <linearGradient id={`${id}-pink`} x1="0" y1="0" x2="1" y2="1"><stop stopColor="#ff6fb8" /><stop offset=".42" stopColor="#ff3b9d" /><stop offset="1" stopColor="#b81568" /></linearGradient>
+      <linearGradient id={`${id}-pink`} x1="0" y1="0" x2="1" y2="1"><stop stopColor="#f8479f" /><stop offset=".46" stopColor="#dd1f7f" /><stop offset="1" stopColor="#9e0f58" /></linearGradient>
       <clipPath id={`${id}-clip`}><rect width="860" height="540" rx="40" /></clipPath>
       <pattern id={`${id}-dots`} width="26" height="26" patternUnits="userSpaceOnUse"><circle cx="13" cy="13" r="1.5" fill="#fff" opacity=".12" /></pattern>
     </defs>
@@ -71,13 +75,13 @@ export function MemberCard({ member, demo, onOpen, onCopy, copied }: {
       <rect x="490" y="46" width="328" height="64" rx="32" fill="#fff" fillOpacity=".16" stroke="#fff" strokeOpacity=".35" strokeWidth="2" />
       <path d="M516 70 L523 85 L541 85 L548 70 L537 76 L532 63 L527 76Z" fill="#ffdf9a" />
       <text x="560" y="86" fontSize="21" fontWeight="700" letterSpacing="1">{tierLabel(member.tier)}</text>
-      <text x="44" y="210" fontSize="20" fontWeight="700" letterSpacing="3" fillOpacity=".8">YOUR BEAUTY MEMBERSHIP</text>
+      <text x="44" y="210" fontSize="20" fontWeight="700" letterSpacing="3" fillOpacity=".8">NAMA MEMBER</text>
       <text x="44" y="276" fontSize={nameSize} fontWeight="700" textLength={member.name.length > 20 ? 480 : undefined} lengthAdjust="spacingAndGlyphs">{member.name.toUpperCase()}</text>
       <rect x="44" y="307" width="302" height="76" rx="20" fill="#fff" fillOpacity=".16" stroke="#fff" strokeOpacity=".3" strokeWidth="2" />
       <text x="66" y="355" fontSize="29" fontWeight="700" letterSpacing="3">{member.card}</text>
       <rect x="553" y="253" width="265" height="154" rx="30" fill="#fff" />
       <g transform="translate(571 269)"><Code39 value={member.card} width={229} height={87} /></g>
-      <text x="685" y="385" textAnchor="middle" fontSize="19" fontWeight="700" fill="#ff3b9d">KARTU MEMBER</text>
+      <text x="685" y="385" textAnchor="middle" fontSize="19" fontWeight="700" fill="#b8126a">KARTU MEMBER</text>
       <path d="M44 449 H816" stroke="#fff" strokeOpacity=".3" />
       <text x="44" y="502" fontSize="21" fillOpacity=".8">{demo ? 'Kartu contoh. Bukan kartu member asli.' : <>Teman belanja <tspan fontFamily="Georgia, 'Times New Roman', serif" fontStyle="italic" fontSize="25" fillOpacity="1">setiamu.</tspan></>}</text>
       {!demo && <text x="816" y="502" textAnchor="end" fontSize="19" fontWeight="700" letterSpacing="2" fillOpacity=".8">BEAUTY MEMBER</text>}
@@ -86,10 +90,15 @@ export function MemberCard({ member, demo, onOpen, onCopy, copied }: {
   const barcode = <><Code39 value={member.card} width={112} height={40} title={`Code 39 nomor kartu ${member.card}`} /><span><BarcodeIcon size={12} />{onOpen ? 'Lihat barcode' : 'Kartu member'}</span></>;
   return <div className="emember">
     <div hidden aria-hidden="true">{artwork}</div>
+    {!onOpen && <div className="scan-panel">
+      <Code39 className="scan-barcode" value={member.card} height={96} title={`Barcode kartu member ${member.card}`} />
+      <span className="scan-number">{member.card}</span>
+      <span className="scan-hint"><SunDim size={14} weight="fill" />Naikkan kecerahan layar biar kasir mudah memindai.</span>
+    </div>}
     <div className={onOpen ? '' : 'modal-card'}><div className="membership-card">
       <Heart className="card-heart heart-one" weight="thin" /><Heart className="card-heart heart-two" weight="thin" />
       <div className="card-top"><span className="brand brand-light"><img className="brand-symbol" src="/logo.png" alt="" width={591} height={548} /><span className="brand-type">beauty<span>KENDARI</span></span></span><span className="gold-label"><Crown size={17} weight="fill" />{tierLabel(member.tier)}</span></div>
-      <div className="card-bottom"><div><span className="card-label">YOUR BEAUTY MEMBERSHIP</span><h2>{member.name}</h2><button className="card-number" aria-label="Salin nomor kartu" onClick={onCopy}>{member.card}<Copy size={15} /></button></div>{onOpen ? <button className="card-qr" onClick={onOpen} aria-label="Perbesar barcode kartu member">{barcode}</button> : <div className="card-qr">{barcode}</div>}</div>
+      <div className="card-bottom"><div><span className="card-label">Nama member</span><h2>{member.name}</h2><button className="card-number" aria-label="Salin nomor kartu" onClick={onCopy}>{member.card}<Copy size={15} /></button></div>{onOpen ? <button className="card-qr" onClick={onOpen} aria-label="Perbesar barcode kartu member">{barcode}</button> : <div className="card-qr">{barcode}</div>}</div>
       <div className="card-footer"><span className="card-tagline">Teman belanja <em>setiamu.</em></span><span>beauty member</span></div>
     </div></div>
     {demo && <span className="demo-disclaimer">Kartu contoh. Bukan kartu member asli.</span>}

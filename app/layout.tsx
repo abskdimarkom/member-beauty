@@ -1,9 +1,14 @@
 import type { Metadata, Viewport } from 'next';
-import { Plus_Jakarta_Sans } from 'next/font/google';
+import { Instrument_Serif, Plus_Jakarta_Sans } from 'next/font/google';
 import Script from 'next/script';
 import './globals.css';
 import { landingDescription, landingTitle, ogImage, siteName, siteUrl } from '@/lib/seo';
 const jakarta = Plus_Jakarta_Sans({ subsets: ['latin'], variable: '--font-jakarta', display: 'swap' });
+// Display serif for page titles and the landing headlines. Loaded rather than
+// left to Georgia, which Android (most members) does not ship.
+const instrument = Instrument_Serif({ subsets: ['latin'], weight: '400', style: ['normal', 'italic'], variable: '--font-instrument', display: 'swap' });
+// Applies a saved dark theme before first paint, so it never flashes light.
+const themeScript = `try{if(localStorage.getItem('beauty-theme')==='dark')document.documentElement.dataset.theme='dark'}catch(e){}`;
 // Analytics stays off until a measurement id / beacon token is configured, so local
 // and preview builds never report traffic into the production property. Both vars are
 // inlined at build time (NEXT_PUBLIC_*), so they must be set before `next build`.
@@ -24,8 +29,12 @@ export const metadata: Metadata = {
 export const viewport: Viewport = { width: 'device-width', initialScale: 1, themeColor: '#FE3E9F' };
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="id" suppressHydrationWarning>
-      <body className={jakarta.variable}>
+    // The font variables sit on <html> so the :root tokens in tokens.css can read them.
+    <html lang="id" className={`${jakarta.variable} ${instrument.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
+      <body>
         {children}
         {gaId && <>
           <Script src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`} strategy="afterInteractive" />

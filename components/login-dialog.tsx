@@ -75,7 +75,7 @@ export function LoginDialog({ demo, sample }: { demo: boolean; sample?: Member }
         <button type="button" className="icon-button login-dialog-close" onClick={close} aria-label="Tutup">
           <X size={20} />
         </button>
-        <span className="login-form-eyebrow">BEAUTY MEMBER</span>
+        <span className="eyebrow login-form-eyebrow">Beauty member</span>
         <h2 id="login-dialog-title">Masuk ke akunmu.</h2>
         <p className="login-description">Kartu dan poin membermu, dalam satu tempat.</p>
         <form onSubmit={submit} aria-busy={loading}>
