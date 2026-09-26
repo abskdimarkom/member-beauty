@@ -8,8 +8,8 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { Brand } from '@/components/brand';
 import { MemberCard } from '@/components/member-card';
 import { ThemeButton } from '@/components/theme-button';
-import { ArrowClockwise, ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, Bag, BarcodeIcon, CalendarBlank, CameraIcon, CaretDown, CaretRight, Check, CheckCircle, Clock, DeviceMobile, DownloadSimple, Gift, Heart, House, Info, Receipt, ShieldCheck, SignOut, Sparkle, TrashSimpleIcon, WarningCircle, WhatsappLogo, X } from '@phosphor-icons/react';
-import { dateLabel, number, rupiah } from '@/lib/format';
+import { ArrowClockwise, ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, Bag, BarcodeIcon, CalendarBlank, CameraIcon, CaretDown, CaretRight, Check, CheckCircle, Clock, DeviceMobile, DownloadSimple, Gift, Heart, House, IdentificationCard, Info, Receipt, ShieldCheck, SignOut, Sparkle, TrashSimpleIcon, WarningCircle, WhatsappLogo, X } from '@phosphor-icons/react';
+import { dateLabel, number, phoneLabel, rupiah, tierLabel } from '@/lib/format';
 import type { PageData } from '@/lib/load';
 import type { Transaction } from '@/lib/types';
 import { COMMUNITY_URL, redemptionOptions, terms } from '@/lib/terms';
@@ -132,7 +132,7 @@ export function BeautyApp({ page, data }: { page: Page; data: PageData }) {
      <span className={`avatar account-avatar ${avatarPhoto ? 'has-photo' : ''}`}>{avatarContent(avatarPhoto, member.name, () => setAvatarPhoto(null))}</span>
      <span className="profile-avatar-badge" aria-hidden="true"><CameraIcon size={14} weight="fill" /></span>
     </button>
-    <span className="account-profile-copy"><strong>{member.name}</strong><span>{member.tier} MEMBER</span><small>No. member {member.card}</small></span>
+    <span className="account-profile-copy"><strong>{member.name}</strong><span>{tierLabel(member.tier)}</span></span>
    </section>
    <input ref={avatarInputRef} hidden type="file" accept="image/jpeg,image/png,image/webp" onChange={changeAvatar} aria-label="Pilih foto profil" />
    <button type="button" className="button primary full profile-photo-cta" onClick={() => avatarInputRef.current?.click()} disabled={avatarBusy}>
@@ -142,6 +142,14 @@ export function BeautyApp({ page, data }: { page: Page; data: PageData }) {
    {avatarError && <p className="form-error profile-photo-feedback" role="alert"><WarningCircle size={17} />{avatarError}</p>}
    {avatarMessage && <p className="profile-photo-success" role="status"><CheckCircle size={17} weight="fill" />{avatarMessage}</p>}
    {avatarPhoto && <button type="button" className="profile-photo-remove" onClick={removeAvatar} disabled={avatarBusy}><TrashSimpleIcon size={16} />Hapus foto</button>}
+   <span className="account-section-label">DATA MASUK</span>
+   <div className="account-login-info">
+    <dl>
+     <div><dt><DeviceMobile size={17} />No. HP terdaftar</dt><dd>{member.phone ? phoneLabel(member.phone) : <span className="account-login-missing">Belum tercatat</span>}</dd></div>
+     <div><dt><IdentificationCard size={17} />No. member</dt><dd>{member.card}</dd></div>
+    </dl>
+    <p><Info size={14} />{member.phone ? 'Lupa nomor kartu? Masuk cukup pakai nomor HP ini.' : 'Minta kasir outlet mencatat nomor HP-mu agar masuk lebih mudah.'}</p>
+   </div>
    <span className="account-section-label">PENGATURAN</span>
    <div className="account-actions">
     <button type="button" onClick={() => { setAccountOpen(false); void install(); }} disabled={installed}><span className="account-action-icon"><DownloadSimple size={19} /></span><span className="account-action-copy"><strong>{installed ? 'Aplikasi sudah terpasang' : 'Pasang aplikasi'}</strong><small>Akses Beauty lebih cepat</small></span><CaretRight size={16} /></button>

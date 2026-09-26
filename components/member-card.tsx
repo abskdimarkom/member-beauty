@@ -3,6 +3,7 @@
 import { useId, useRef, useState } from 'react';
 import { DownloadSimple, Check, Copy, Heart, Crown, BarcodeIcon } from '@phosphor-icons/react';
 import { Code39 } from './code39';
+import { tierLabel } from '@/lib/format';
 import type { Member } from '@/lib/types';
 
 /** Original membership layout with a self-contained SVG for PNG export. */
@@ -69,7 +70,7 @@ export function MemberCard({ member, demo, onOpen, onCopy, copied }: {
       <text x="158" y="118" fontSize="17" letterSpacing="6">KENDARI</text>
       <rect x="490" y="46" width="328" height="64" rx="32" fill="#fff" fillOpacity=".16" stroke="#fff" strokeOpacity=".35" strokeWidth="2" />
       <path d="M516 70 L523 85 L541 85 L548 70 L537 76 L532 63 L527 76Z" fill="#ffdf9a" />
-      <text x="560" y="86" fontSize="21" fontWeight="700" letterSpacing="1">{member.tier.toUpperCase()} MEMBER</text>
+      <text x="560" y="86" fontSize="21" fontWeight="700" letterSpacing="1">{tierLabel(member.tier)}</text>
       <text x="44" y="210" fontSize="20" fontWeight="700" letterSpacing="3" fillOpacity=".8">YOUR BEAUTY MEMBERSHIP</text>
       <text x="44" y="276" fontSize={nameSize} fontWeight="700" textLength={member.name.length > 20 ? 480 : undefined} lengthAdjust="spacingAndGlyphs">{member.name.toUpperCase()}</text>
       <rect x="44" y="307" width="302" height="76" rx="20" fill="#fff" fillOpacity=".16" stroke="#fff" strokeOpacity=".3" strokeWidth="2" />
@@ -78,7 +79,7 @@ export function MemberCard({ member, demo, onOpen, onCopy, copied }: {
       <g transform="translate(571 269)"><Code39 value={member.card} width={229} height={87} /></g>
       <text x="685" y="385" textAnchor="middle" fontSize="19" fontWeight="700" fill="#ff3b9d">KARTU MEMBER</text>
       <path d="M44 449 H816" stroke="#fff" strokeOpacity=".3" />
-      <text x="44" y="502" fontSize="21" fillOpacity=".8">{demo ? 'Kartu contoh. Bukan kartu member asli.' : 'Teman perjalanan cantikmu.'}</text>
+      <text x="44" y="502" fontSize="21" fillOpacity=".8">{demo ? 'Kartu contoh. Bukan kartu member asli.' : <>Teman belanja <tspan fontFamily="Georgia, 'Times New Roman', serif" fontStyle="italic" fontSize="25" fillOpacity="1">setiamu.</tspan></>}</text>
       {!demo && <text x="816" y="502" textAnchor="end" fontSize="19" fontWeight="700" letterSpacing="2" fillOpacity=".8">BEAUTY MEMBER</text>}
     </g>
   </svg>;
@@ -87,9 +88,9 @@ export function MemberCard({ member, demo, onOpen, onCopy, copied }: {
     <div hidden aria-hidden="true">{artwork}</div>
     <div className={onOpen ? '' : 'modal-card'}><div className="membership-card">
       <Heart className="card-heart heart-one" weight="thin" /><Heart className="card-heart heart-two" weight="thin" />
-      <div className="card-top"><span className="brand brand-light"><img className="brand-symbol" src="/logo.png" alt="" width={591} height={548} /><span className="brand-type">beauty<span>KENDARI</span></span></span><span className="gold-label"><Crown size={17} weight="fill" />{member.tier} MEMBER</span></div>
+      <div className="card-top"><span className="brand brand-light"><img className="brand-symbol" src="/logo.png" alt="" width={591} height={548} /><span className="brand-type">beauty<span>KENDARI</span></span></span><span className="gold-label"><Crown size={17} weight="fill" />{tierLabel(member.tier)}</span></div>
       <div className="card-bottom"><div><span className="card-label">YOUR BEAUTY MEMBERSHIP</span><h2>{member.name}</h2><button className="card-number" aria-label="Salin nomor kartu" onClick={onCopy}>{member.card}<Copy size={15} /></button></div>{onOpen ? <button className="card-qr" onClick={onOpen} aria-label="Perbesar barcode kartu member">{barcode}</button> : <div className="card-qr">{barcode}</div>}</div>
-      <div className="card-footer"><span>Teman perjalanan cantikmu.</span><span>beauty member</span></div>
+      <div className="card-footer"><span className="card-tagline">Teman belanja <em>setiamu.</em></span><span>beauty member</span></div>
     </div></div>
     {demo && <span className="demo-disclaimer">Kartu contoh. Bukan kartu member asli.</span>}
     {!onOpen && <><div className="emember-actions">

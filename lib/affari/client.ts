@@ -13,7 +13,23 @@ const TIMEOUT_MS = Number(process.env.AFFARI_TIMEOUT_MS ?? 12000);
  * identified by phone OR card number and the endpoint takes one field at a
  * time, so login walks the list until something matches.
  */
-const LOGIN_FIELDS = (process.env.AFFARI_LOGIN_FIELDS ?? 'kode,nohp').split(',').map((f) => f.trim()).filter(Boolean);
+const LOGIN_FIELDS = (process.env.AFFARI_LOGIN_FIELDS ?? 'kode,ponsel').split(',').map((f) => f.trim()).filter(Boolean);
+
+/** Login fields that hold a phone number rather than a card code. */
+const PHONE_FIELDS = new Set(['ponsel']);
+
+/**
+ * Affari matches phone numbers exactly and stores them as 62xxxxxxxxxx, while
+ * members type 0812…, +62 812… or add dashes. Returns the stored form first and
+ * the local 0 form as a fallback for records keyed in by hand — or nothing when
+ * the input is not a phone number at all (a card code, say).
+ */
+function phoneCandidates(value: string): string[] {
+  if (!/^\+?[\d\s-]+$/.test(value)) return [];
+  const national = value.replace(/\D/g, '').replace(/^(62|0)/, '');
+  if (national.length < 8) return [];
+  return [`62${national}`, `0${national}`];
+}
 
 /**
  * Demo (sample-member) mode is a development-only convenience: it activates
@@ -99,27 +115,30 @@ export async function findMember(value: string): Promise<Member> {
   let lastUpstream: AffariError | null = null;
 
   for (const field of LOGIN_FIELDS) {
-    let payload: unknown;
-    try {
-      payload = await call('/api/member', { field, value: trimmed });
-    } catch (error) {
-      if (error instanceof AffariError && error.kind === 'upstream') {
-        // One field erroring shouldn't hide a match on the next one.
-        lastUpstream = error;
-        continue;
+    const values = PHONE_FIELDS.has(field.toLowerCase()) ? phoneCandidates(trimmed) : [trimmed];
+    for (const value of values) {
+      let payload: unknown;
+      try {
+        payload = await call('/api/member', { field, value });
+      } catch (error) {
+        if (error instanceof AffariError && error.kind === 'upstream') {
+          // One field erroring shouldn't hide a match on the next one.
+          lastUpstream = error;
+          continue;
+        }
+        throw error;
       }
-      throw error;
-    }
 
-    const matches = rows(payload);
-    if (matches.length === 0) continue;
-    if (matches.length > 1) {
-      console.warn(`[affari] ${matches.length} members matched field=${field}; using the first. PRD assumes uniqueness.`);
-    }
+      const matches = rows(payload);
+      if (matches.length === 0) continue;
+      if (matches.length > 1) {
+        console.warn(`[affari] ${matches.length} members matched field=${field}; using the first. PRD assumes uniqueness.`);
+      }
 
-    const member = toMember(matches[0]);
-    if (member.kode) return member;
-    console.warn(`[affari] member matched on field=${field} but carries no Kode; ignoring.`);
+      const member = toMember(matches[0]);
+      if (member.kode) return member;
+      console.warn(`[affari] member matched on field=${field} but carries no Kode; ignoring.`);
+    }
   }
 
   if (lastUpstream) throw lastUpstream;

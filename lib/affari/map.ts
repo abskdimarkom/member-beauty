@@ -94,15 +94,15 @@ export function toMember(row: Raw): Member {
   const kode = text(row, ['Kode', 'KodeMember', 'MemberCode']);
   const card = text(row, ['NoKartu', 'NomorKartu', 'KartuMember', 'NoMember', 'Kode'], kode);
   const expiresIso = isoDate(pick(row, ['TglBerakhir', 'TanggalBerakhir', 'ExpiredDate']));
-  const joinIso = isoDate(pick(row, ['TglDaftar', 'TanggalDaftar', 'TglGabung', 'CreatedDate']));
+  const joinIso = isoDate(pick(row, ['TglRegis', 'TglDaftar', 'TanggalDaftar', 'TglGabung', 'CreatedDate']));
 
   return {
     kode,
     name,
     firstName: name.split(/\s+/)[0] || name,
     card,
-    phone: text(row, ['NoHP', 'NoHp', 'Handphone', 'Telepon', 'Phone']),
-    tier: text(row, ['JMember', 'JenisMember', 'Tier', 'Grade'], 'MEMBER').toUpperCase(),
+    phone: text(row, ['Ponsel', 'NoHP', 'Handphone', 'Ponsel2', 'Telepon']),
+    tier: text(row, ['JMember', 'JenisMember', 'Tier', 'Grade']).toUpperCase(),
     points: money(row, ['PointAkhir', 'PoinAkhir', 'SaldoPoint', 'Point']),
     expires: expiresIso ? longDate(expiresIso) : null,
     since: joinIso ? joinIso.slice(0, 4) : null,

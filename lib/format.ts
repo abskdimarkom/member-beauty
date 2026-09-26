@@ -5,6 +5,15 @@ export const number = (value: number) => new Intl.NumberFormat('id-ID').format(v
 export const rupiah = (value: number) =>
   new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(value);
 
+/** Groups a phone number as 0812-3456-7890. Login strips the dashes, so the label can be typed back as shown. */
+export function phoneLabel(value: string): string {
+  const digits = value.replace(/\D/g, '').replace(/^62/, '0');
+  return [digits.slice(0, 4), digits.slice(4, 8), digits.slice(8)].filter(Boolean).join('-') || value;
+}
+
+/** Badge text for a tier. Affari often leaves `JMember` empty, which reads as plain MEMBER. */
+export const tierLabel = (tier: string) => (tier ? `${tier.toUpperCase()} MEMBER` : 'MEMBER');
+
 /** Formats a YYYY-MM-DD string. Anchored at midday WITA so the day never slips. */
 export const dateLabel = (value: string) =>
   new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'long', year: 'numeric', timeZone: TZ }).format(

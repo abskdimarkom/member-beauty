@@ -691,6 +691,15 @@ a { color: inherit; text-decoration: none; }
   color: rgba(255, 255, 255, 0.74);
 }
 
+/* Echoes the serif accent of "Cantikmu, lebih berarti." on the home banner. */
+.card-tagline em {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.22em;
+  font-style: italic;
+  letter-spacing: -0.01em;
+  color: #fff;
+}
+
 .card-footer span:last-child {
   font-weight: 800;
   letter-spacing: 0.16em;
@@ -1913,6 +1922,69 @@ a { color: inherit; text-decoration: none; }
   font-weight: 750;
   letter-spacing: 0.14em;
 }
+
+/* The numbers a member signs in with. Most forget the card, so the phone leads. */
+.account-login-info {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-lg);
+  background: var(--surface-2);
+}
+
+.account-login-info dl { display: flex; flex-direction: column; margin: 0; }
+
+.account-login-info dl > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 46px;
+  padding: 8px 12px;
+}
+
+.account-login-info dl > div + div { border-top: 1px solid var(--line-soft); }
+
+.account-login-info dt {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.account-login-info dt svg { color: var(--pink-deep); }
+
+.account-login-info dd {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 13.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account-login-missing { color: var(--faint); font-weight: 550; }
+
+.account-login-info p {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0;
+  padding: 9px 12px 10px;
+  border-top: 1px dashed var(--line-soft);
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.account-login-info p svg { flex: none; margin-top: 1px; color: var(--faint); }
 
 .account-actions {
   display: flex;

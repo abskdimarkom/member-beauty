@@ -5,7 +5,7 @@ const MEMBER = {
   Kode: 'MBR-77120',
   Nama: 'Siti Rahmawati',
   NoKartu: 'BK000077120',
-  NoHP: '085241110099',
+  Ponsel: '6285241110099',
   JMember: 'gold',
   PointAkhir: '3.150',
   TglBerakhir: '2027-03-31',
@@ -33,7 +33,7 @@ createServer((req, res) => {
     if (value === 'BOOM') return send(500, { IsSuccess: false, Message: 'upstream down' });
     if (value === 'SOFTFAIL') return send(200, { IsSuccess: false, Message: 'query rejected' });
     const hit = (field === 'kode' && (value === MEMBER.Kode || value === MEMBER.NoKartu))
-             || (field === 'nohp' && value === MEMBER.NoHP);
+             || (field === 'ponsel' && value === MEMBER.Ponsel);
     return send(200, hit ? MEMBER : {});           // `{}` = no match, per PRD §5.1
   }
 

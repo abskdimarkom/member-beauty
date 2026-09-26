@@ -12,7 +12,7 @@ import { Code39 } from '@/components/code39';
 import { LoginDialog } from '@/components/login-dialog';
 import { ThemeButton } from '@/components/theme-button';
 import * as demo from '@/lib/demo';
-import { dateLabel, number, rupiah } from '@/lib/format';
+import { dateLabel, number, rupiah, tierLabel } from '@/lib/format';
 import { faq } from '@/lib/seo';
 import { COMMUNITY_URL, redemptionOptions } from '@/lib/terms';
 import type { Member } from '@/lib/types';
@@ -116,7 +116,7 @@ function PhoneShowcase({ member }: { member: Member }) {
               <Heart className="card-heart heart-one" weight="thin" />
               <div className="card-top">
                 <Brand light />
-                <span className="gold-label"><Crown size={12} weight="fill" />{member.tier} MEMBER</span>
+                <span className="gold-label"><Crown size={12} weight="fill" />{tierLabel(member.tier)}</span>
               </div>
               <div className="card-bottom">
                 <div>
@@ -129,7 +129,7 @@ function PhoneShowcase({ member }: { member: Member }) {
                   <span><Barcode size={9} />Lihat barcode</span>
                 </span>
               </div>
-              <div className="card-footer"><span>Teman perjalanan cantikmu.</span><span>beauty member</span></div>
+              <div className="card-footer"><span className="card-tagline">Teman belanja <em>setiamu.</em></span><span>beauty member</span></div>
             </div>
 
             <span className="showcase-card-note">Kartu contoh. Bukan kartu member asli.</span>
